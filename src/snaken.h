@@ -135,6 +135,10 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 
 // ########################################## Execution functions ##########################################
 
+snaken_error_code_t snaken2d_update_snake(snaken2d_t* snaken);
+
+snaken_error_code_t snaken2d_update_workd(snaken2d_t* snaken);
+
 /// @brief Performs a single run cycle in the provided snaken.
 /// @param snaken The snaken to run the loop in.
 /// @return The code for the occurred error, [ERROR_NONE] if none.
@@ -173,7 +177,17 @@ snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t w
 
 // ########################################## Util functions ##########################################
 
-snaken_error_code_t snaken2d_move_snake_head(snaken2d_t* snaken, snaken_world_size_t* new_head_location);
+/// @brief Moves the snake along its facing direction.
+/// @param snaken The snaken to compute the movement on.
+/// @param result The resulting snake head location.
+/// @return The code for the occurred error, [ERROR_NONE] if none.
+snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken, snaken_world_size_t* result);
+
+snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result);
+
+snaken_error_code_t snaken2d_hit_wall(snaken2d_t* snaken, snaken_bool_t* result);
+
+snaken_error_code_t snaken2d_eat_body(snaken2d_t* snaken, snaken_bool_t* result);
 
 
 #ifdef __cplusplus

@@ -51,48 +51,20 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 
 // ########################################## Execution functions ##########################################
 
-snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
-    // 1: Move the snake along its facing direction.
-    // 1.1: First compute the new head position.
-    snaken_world_size_t new_head_location;
-    snaken2d_move_snake_head(snaken, &new_head_location);
+snaken_error_code_t snaken2d_update_snake(snaken2d_t* snaken) {
+    snaken_error_code_t error = ERROR_NONE;
 
-    // 1.2: Then update its body accordingly without reallocating it.
-    snaken_world_size_t section_location = snaken->snake_body[0];
-    snaken->snake_body[0] = new_head_location;
-    for (snaken_world_size_t i = 1; i < snaken->snake_length; i++) {
-        snaken->snake_body[i] = snaken->snake_body[i - 1];
+    // 1: Move the snake along its facing direction.
+    error = snaken2d_move_snake(snaken);
+    if (error != ERROR_NONE) {
+        return error;
     }
 
     // 2: Let the snake eat any apple in its way.
-    // 2.1: Check whether the snake found any apples.
     snaken_bool_t apple_found = FALSE;
-    for (snaken_world_size_t i = 0; i < snaken->apples_length; i++) {
-        // The snake head can be at most on one apple, so leave as soon as one is found.
-        if (snaken->snake_body[0] == snaken->apples[i]) {
-            // An apple was found, so eat it and increase the snake length:
-            apple_found = TRUE;
-
-            // Eat the apple.
-            snaken->apples_length--;
-            snaken_world_size_t* new_apples = realloc(snaken->apples, snaken->apples_length);
-            if (new_apples == NULL) {
-                return ERROR_FAILED_ALLOC;
-            }
-            free(snaken->apples);
-            snaken->apples = new_apples;
-
-            // Increase the snake length.
-            snaken->snake_length++;
-            snaken_world_size_t* new_snake_body = realloc(snaken->snake_body, snaken->snake_length);
-            if (new_snake_body == NULL) {
-                return ERROR_FAILED_ALLOC;
-            }
-            free(snaken->snake_body);
-            snaken->snake_body = new_snake_body;
-
-            break;
-        }
+    error = snaken2d_eat_apple(snaken, &apple_found);
+    if (error != ERROR_NONE) {
+        return error;
     }
 
     // If any apple was found, then no wall can, so just end here.
@@ -101,7 +73,44 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
     }
 
     // 3: Check for walls.
+    snaken_bool_t wall_found = FALSE;
+    error = snaken2d_hit_wall(snaken, &wall_found);
+    if (error != ERROR_NONE) {
+        return error;
+    }
+
+    if (wall_found) {
+        return ERROR_NONE;
+    }
+
+    // 4: Check for body if so specified.
+    snaken_bool_t body_found = FALSE;
+    error = snaken2d_eat_body(snaken, &body_found);
+    if (error != ERROR_NONE) {
+        return error;
+    }
+
+    return ERROR_NONE;
+}
+
+snaken_error_code_t snaken2d_update_workd(snaken2d_t* snaken) {
     // TODO.
+    return ERROR_NONE;
+}
+
+snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
+    snaken_error_code_t error = ERROR_NONE;
+
+    // Move the snake and check for .
+    error = snaken2d_update_snake(snaken);
+    if (error != ERROR_NONE) {
+        return error;
+    }
+
+    error = snaken2d_update_workd(snaken);
+    if (error != ERROR_NONE) {
+        return error;
+    }
 
     return ERROR_NONE;
 }
@@ -126,22 +135,108 @@ snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t dire
 
 // ########################################## Util functions ##########################################
 
-snaken_error_code_t snaken2d_move_snake_head(snaken2d_t* snaken, snaken_world_size_t* new_head_location) {
+snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken) {
+    // Save the previous head location in order to move its neck to it.
+    snaken_world_size_t section_location = snaken->snake_body[0];
+
+    // Update the snake head.
     switch (snaken->snake_direction) {
         case UP:
-            new_head_location = snaken->snake_body[0] - snaken->world_width;
+            snaken->snake_body[0] -= snaken->world_width;
             break;
         case LEFT:
-            new_head_location = snaken->snake_body[0] - 1;
+            snaken->snake_body[0] -= 1;
             break;
         case DOWN:
-            new_head_location = snaken->snake_body[0] + snaken->world_width;
+            snaken->snake_body[0] += snaken->world_width;
             break;
         case RIGHT:
-            new_head_location = snaken->snake_body[0] + 1;
+            snaken->snake_body[0] += 1;
             break;
         default:
             break;
+    }
+
+    // Update the snake body accordingly without reallocating it.
+    for (snaken_world_size_t i = 1; i < snaken->snake_length; i++) {
+        // Save the current snake body section location.
+        section_location = snaken->snake_body[i];
+
+        // Update the body section.
+        snaken->snake_body[i] = snaken->snake_body[i - 1];
+    }
+
+    return ERROR_NONE;
+}
+
+snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result) {
+    result = FALSE;
+
+    for (snaken_world_size_t i = 0; i < snaken->apples_length; i++) {
+        // The snake head can be at most on one apple, so leave as soon as one is found.
+        if (snaken->snake_body[0] == snaken->apples[i]) {
+            // An apple was found, so eat it and increase the snake length:
+            result = TRUE;
+
+            // Eat the apple.
+            snaken->apples_length--;
+            snaken_world_size_t* new_apples = realloc(snaken->apples, snaken->apples_length);
+            if (new_apples == NULL) {
+                return ERROR_FAILED_ALLOC;
+            }
+            free(snaken->apples);
+            snaken->apples = new_apples;
+
+            // Increase the snake length.
+            snaken->snake_length++;
+            snaken_world_size_t* new_snake_body = realloc(snaken->snake_body, snaken->snake_length);
+            if (new_snake_body == NULL) {
+                return ERROR_FAILED_ALLOC;
+            }
+            free(snaken->snake_body);
+            snaken->snake_body = new_snake_body;
+
+            break;
+        }
+    }
+
+    return ERROR_NONE;
+}
+
+snaken_error_code_t snaken2d_hit_wall(snaken2d_t* snaken, snaken_bool_t* result) {
+    result = FALSE;
+
+    for (snaken_world_size_t i = 0; i < snaken->walls_length; i++) {
+        // The snake head can be at most on one wall, so leave as soon as one is found.
+        if (snaken->snake_body[0] == snaken->walls[i]) {
+            // A wall was found, so hit it and let the snake die:
+            result = TRUE;
+
+            // Let the snake die.
+            snaken->snake_alive = FALSE;
+
+            break;
+        }
+    }
+
+    return ERROR_NONE;
+}
+
+snaken_error_code_t snaken2d_eat_body(snaken2d_t* snaken, snaken_bool_t* result) {
+    result = FALSE;
+
+    // Start from 1 since the first element is actually the snake head.
+    for (snaken_world_size_t i = 1; i < snaken->snake_length; i++) {
+        // The snake head can be at most on one wall, so leave as soon as one is found.
+        if (snaken->snake_body[0] == snaken->snake_body[i]) {
+            // A wall was found, so hit it and let the snake die:
+            result = TRUE;
+
+            // Let the snake die.
+            snaken->snake_alive = FALSE;
+
+            break;
+        }
     }
 
     return ERROR_NONE;
