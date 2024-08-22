@@ -135,7 +135,7 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 
 // ########################################## Execution functions ##########################################
 
-snaken_error_code_t snaken2d_update_snake(snaken2d_t* snaken);
+snaken_error_code_t snaken2d_update_content(snaken2d_t* snaken);
 
 snaken_error_code_t snaken2d_update_workd(snaken2d_t* snaken);
 

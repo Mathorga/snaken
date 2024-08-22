@@ -51,7 +51,7 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 
 // ########################################## Execution functions ##########################################
 
-snaken_error_code_t snaken2d_update_snake(snaken2d_t* snaken) {
+snaken_error_code_t snaken2d_update_content(snaken2d_t* snaken) {
     snaken_error_code_t error = ERROR_NONE;
 
     // 1: Move the snake along its facing direction.
@@ -94,19 +94,26 @@ snaken_error_code_t snaken2d_update_snake(snaken2d_t* snaken) {
 }
 
 snaken_error_code_t snaken2d_update_workd(snaken2d_t* snaken) {
-    // TODO.
+    // Loop through the whole world and update each cell according to the current snaken content (snake, apples, walls) state.
+    for (snaken_world_size_t y = 0; y < snaken->world_height; y++) {
+        for (snaken_world_size_t x = 0; x < snaken->world_width; x++) {
+            
+        }
+    }
+
     return ERROR_NONE;
 }
 
 snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
     snaken_error_code_t error = ERROR_NONE;
 
-    // Move the snake and check for .
-    error = snaken2d_update_snake(snaken);
+    // Move the snake one step and check for apples/walls/body along the way.
+    error = snaken2d_update_content(snaken);
     if (error != ERROR_NONE) {
         return error;
     }
 
+    // Update the world view matrix according to the updated content.
     error = snaken2d_update_workd(snaken);
     if (error != ERROR_NONE) {
         return error;
