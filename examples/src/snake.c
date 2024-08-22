@@ -16,6 +16,14 @@ int main(void) {
     const int screen_width = world_width * cell_width;
     const int screen_height = world_height * cell_height;
 
+    snaken_error_code_t error;
+
+    snaken2d_t* snaken;
+    error = snaken2d_init(&snaken);
+    if (error != SNAKEN_ERROR_NONE) {
+        printf("There was an error initializing the snaken: %d\n", error);
+    }
+
     InitWindow(screen_width, screen_height, "Snake");
 
     SetTargetFPS(60);
@@ -32,10 +40,12 @@ int main(void) {
         //----------------------------------------------------------------------------------
         BeginDrawing();
             ClearBackground(RAYWHITE);
-            for (int j = 0; j < world_height; j++) {
-                for (int i = 0; i < world_width; i++) {
-                    DrawRectangle(i * cell_width + 1, j * cell_height + 1, cell_width - 2, cell_height - 2, RED);
-                }
+            // Draw snake.
+            for (snaken_world_size_t i = 0; i < snaken->snake_length; i++) {
+                snaken_world_size_t i_x = i / snaken->world_width;
+                snaken_world_size_t i_y = i % snaken->world_width;
+
+                DrawRectangle(i_x * cell_width, i_y * cell_height, cell_width, cell_height, RED);
             }
             //DrawRectangle(20, 20, 20, 20, RED);
         EndDrawing();

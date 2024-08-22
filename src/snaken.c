@@ -14,25 +14,33 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
     (*snaken)->world_width = world_width;
     (*snaken)->world_height = world_height;
 
-    // Allocate walls helper.
+    // Allocate walls.
     (*snaken)->walls_length = 0;
     (*snaken)->walls = (snaken_world_size_t*) malloc((*snaken)->walls_length * sizeof(snaken_world_size_t));
     if ((*snaken)->walls == NULL) {
         return SNAKEN_ERROR_FAILED_ALLOC;
     }
 
-    // Allocate apples helper.
+    // Allocate apples.
     (*snaken)->apples_length = 0;
     (*snaken)->apples = (snaken_world_size_t*) malloc((*snaken)->apples_length * sizeof(snaken_world_size_t));
     if ((*snaken)->apples == NULL) {
         return SNAKEN_ERROR_FAILED_ALLOC;
     }
 
-    // Allocate snake body helper.
+    // Allocate snake body.
     (*snaken)->snake_length = STARTING_SNAKE_LENGTH;
     (*snaken)->snake_body = (snaken_world_size_t*) malloc((*snaken)->snake_length * sizeof(snaken_world_size_t));
     if ((*snaken)->snake_body == NULL) {
         return SNAKEN_ERROR_FAILED_ALLOC;
+    }
+
+    // Populate the snake head.
+    (*snaken)->snake_body[0] = IDX2D(world_width / 2, world_height / 2, world_width);
+
+    // Populate the snake body.
+    for (snaken_world_size_t i = 1; i < (*snaken)->snake_length; i++) {
+        (*snaken)->snake_body[i] = (*snaken)->snake_body[0];
     }
 
     (*snaken)->snake_speed = DEFAULT_SNAKE_SPEED;
