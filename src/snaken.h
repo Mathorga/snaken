@@ -62,7 +62,7 @@ typedef enum {
     EMPTY = 0x00,
     SNAKE_HEAD = 0x01,
     SNAKE_BODY = 0x02,
-    FOOD = 0x03,
+    APPLE = 0x03,
     WALL = 0x04
 } snaken_cell_type_t;
 
@@ -77,8 +77,6 @@ typedef struct {
     // World size.
     snaken_world_size_t world_width;
     snaken_world_size_t world_height;
-
-    snaken_cell_type_t* world;
 
     // ################ Walls locations ################
 
@@ -135,10 +133,6 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 
 // ########################################## Execution functions ##########################################
 
-snaken_error_code_t snaken2d_update_content(snaken2d_t* snaken);
-
-snaken_error_code_t snaken2d_update_workd(snaken2d_t* snaken);
-
 /// @brief Performs a single run cycle in the provided snaken.
 /// @param snaken The snaken to run the loop in.
 /// @return The code for the occurred error, [ERROR_NONE] if none.
@@ -153,10 +147,11 @@ snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken);
 // ########################################## Getter functions ##########################################
 
 /// @brief Retrieves the current snake view and stores it in [view].
+/// @brief The view is computed according to the snake facing direction and view radius.
 /// @param view The view to populate from the given snaken.
 /// @param snaken The snaken to extract the view from.
 /// @return The code for the occurred error, [ERROR_NONE] if none.
-snaken_error_code_t snaken2d_get_snake_view(snaken_world_size_t* view, snaken2d_t* snaken);
+snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type_t* view);
 
 
 // ########################################## Setter functions ##########################################

@@ -10,13 +10,9 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
         return ERROR_FAILED_ALLOC;
     }
 
-    // Allocate the world.
+    // Store world size.
     (*snaken)->world_width = world_width;
     (*snaken)->world_height = world_height;
-    (*snaken)->world = (snaken_cell_type_t*) malloc((*snaken)->world_width * (*snaken)->world_height * sizeof(snaken_cell_type_t));
-    if ((*snaken)->world == NULL) {
-        return ERROR_FAILED_ALLOC;
-    }
 
     // Allocate walls helper.
     (*snaken)->walls_length = 0;
@@ -51,7 +47,7 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 
 // ########################################## Execution functions ##########################################
 
-snaken_error_code_t snaken2d_update_content(snaken2d_t* snaken) {
+snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
     snaken_error_code_t error = ERROR_NONE;
 
     // 1: Move the snake along its facing direction.
@@ -93,40 +89,77 @@ snaken_error_code_t snaken2d_update_content(snaken2d_t* snaken) {
     return ERROR_NONE;
 }
 
-snaken_error_code_t snaken2d_update_workd(snaken2d_t* snaken) {
-    // Loop through the whole world and update each cell according to the current snaken content (snake, apples, walls) state.
-    for (snaken_world_size_t y = 0; y < snaken->world_height; y++) {
-        for (snaken_world_size_t x = 0; x < snaken->world_width; x++) {
-            
-        }
-    }
-
-    return ERROR_NONE;
-}
-
-snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
-    snaken_error_code_t error = ERROR_NONE;
-
-    // Move the snake one step and check for apples/walls/body along the way.
-    error = snaken2d_update_content(snaken);
-    if (error != ERROR_NONE) {
-        return error;
-    }
-
-    // Update the world view matrix according to the updated content.
-    error = snaken2d_update_workd(snaken);
-    if (error != ERROR_NONE) {
-        return error;
-    }
-
+snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken) {
+    // TODO.
     return ERROR_NONE;
 }
 
 
 // ########################################## Getter functions ##########################################
 
-snaken_error_code_t snaken2d_get_snake_view(snaken_world_size_t* view, snaken2d_t* snaken) {
-    // TODO.
+snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type_t* view) {
+    snaken_world_size_t snake_view_diameter = NH_DIAM_2D(snaken->snake_view_radius);
+
+    // Populate the resulting snake view.
+    for (snaken_world_size_t j = 0; j < snake_view_diameter; j++) {
+        // Compute world-space j.
+        snaken_world_size_t global_j = snaken->snake_body[0] - j - snaken->snake_view_radius;
+        for (snaken_world_size_t i = 0; i < snake_view_diameter; i++) {
+            // Compute world-space i.
+            snaken_world_size_t global_i = snaken->snake_body[0] - i - snaken->snake_view_radius;
+
+            snaken_world_size_t local_location = IDX2D(i, j, snake_view_diameter);
+            snaken_world_size_t global_location = IDX2D(global_i, global_j, snaken->world_width);
+
+            // Prepopulate with empty space.
+            view[local_location] = EMPTY;
+
+            // Check for snake head.
+            if (snaken->snake_body[0] == global_location) {
+                view[local_location] = SNAKE_HEAD;
+                continue;
+            }
+
+            // Check for snake body.
+            snaken_bool_t snake_found = FALSE;
+            for (snaken_world_size_t k = 1; k < snaken->snake_length; k++) {
+                if (snaken->snake_body[k] == global_location) {
+                    view[local_location] = SNAKE_BODY;
+                    snake_found = TRUE;
+                    break;
+                }
+            }
+            if (snake_found) {
+                continue;
+            }
+
+            // Check for apples.
+            snaken_bool_t apple_found = FALSE;
+            for (snaken_world_size_t k = 0; k < snaken->apples_length; k++) {
+                if (snaken->apples[k] == global_location) {
+                    view[local_location] = APPLE;
+                    apple_found = TRUE;
+                    break;
+                }
+            }
+            if (apple_found) {
+                continue;
+            }
+
+            // Check for walls.
+            snaken_bool_t wall_found = FALSE;
+            for (snaken_world_size_t k = 0; k < snaken->walls_length; k++) {
+                if (snaken->walls[k] == global_location) {
+                    view[local_location] = WALL;
+                    wall_found = TRUE;
+                    break;
+                }
+            }
+            if (wall_found) {
+                continue;
+            }
+        }
+    }
     return ERROR_NONE;
 }
 
