@@ -147,7 +147,6 @@ snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken);
 // ########################################## Getter functions ##########################################
 
 /// @brief Retrieves the current snake view and stores it in [view].
-/// @brief The view is computed according to the snake facing direction and view radius.
 /// @param view The view to populate from the given snaken.
 /// @param snaken The snaken to extract the view from.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
