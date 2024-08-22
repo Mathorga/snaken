@@ -179,19 +179,23 @@ snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken) {
     // Save the previous head location in order to move its neck to it.
     snaken_world_size_t section_location = snaken->snake_body[0];
 
+    // Compute the x and y commponents of the head position.
+    snaken_world_size_t x_location = snaken->snake_body[0] % snaken->world_width;
+    snaken_world_size_t y_location = snaken->snake_body[0] / snaken->world_width;
+
     // Update the snake head.
     switch (snaken->snake_direction) {
         case SNAKEN_UP:
-            snaken->snake_body[0] -= snaken->world_width;
+            snaken->snake_body[0] = IDX2D(x_location, WRAP(y_location - 1, snaken->world_height), snaken->world_width);
             break;
         case SNAKEN_LEFT:
-            snaken->snake_body[0] -= 1;
+            snaken->snake_body[0] = IDX2D(WRAP(x_location - 1, snaken->world_width), y_location, snaken->world_width);
             break;
         case SNAKEN_DOWN:
-            snaken->snake_body[0] += snaken->world_width;
+            snaken->snake_body[0] = IDX2D(x_location, WRAP(y_location + 1, snaken->world_height), snaken->world_width);
             break;
         case SNAKEN_RIGHT:
-            snaken->snake_body[0] += 1;
+            snaken->snake_body[0] = IDX2D(WRAP(x_location + 1, snaken->world_width), y_location, snaken->world_width);
             break;
         default:
             break;
