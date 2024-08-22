@@ -47,23 +47,23 @@ typedef int32_t snaken_world_size_t;
 typedef uint8_t snaken_snake_speed_t;
 
 typedef enum {
-    FALSE = 0x00,
-    TRUE = 0x01
+    SNAKEN_FALSE = 0x00,
+    SNAKEN_TRUE = 0x01
 } snaken_bool_t;
 
 typedef enum {
-    UP = 0x00,
-    LEFT = 0x01,
-    DOWN = 0x02,
-    RIGHT = 0x03
+    SNAKEN_UP = 0x00,
+    SNAKEN_LEFT = 0x01,
+    SNAKEN_DOWN = 0x02,
+    SNAKEN_RIGHT = 0x03
 } snaken_dir_t;
 
 typedef enum {
-    EMPTY = 0x00,
-    SNAKE_HEAD = 0x01,
-    SNAKE_BODY = 0x02,
-    APPLE = 0x03,
-    WALL = 0x04
+    SNAKEN_EMPTY = 0x00,
+    SNAKEN_SNAKE_HEAD = 0x01,
+    SNAKEN_SNAKE_BODY = 0x02,
+    SNAKEN_APPLE = 0x03,
+    SNAKEN_WALL = 0x04
 } snaken_cell_type_t;
 
 #define DEFAULT_SNAKE_SPEED 0x7F
@@ -127,7 +127,7 @@ typedef struct {
 /// @param snaken The snaken to initialize.
 /// @param world_width The width of the snaken world.
 /// @param world_height The height of the snaken world.
-/// @return The code for the occurred error, [ERROR_NONE] if none.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world_width, snaken_world_size_t world_height);
 
 
@@ -135,12 +135,12 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 
 /// @brief Performs a single run cycle in the provided snaken.
 /// @param snaken The snaken to run the loop in.
-/// @return The code for the occurred error, [ERROR_NONE] if none.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_tick(snaken2d_t* snaken);
 
 /// @brief Spawns a single apple at a random location.
 /// @param snaken The snaken in which to spawn the apple.
-/// @return The code for the occurred error, [ERROR_NONE] if none.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken);
 
 
@@ -150,7 +150,7 @@ snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken);
 /// @brief The view is computed according to the snake facing direction and view radius.
 /// @param view The view to populate from the given snaken.
 /// @param snaken The snaken to extract the view from.
-/// @return The code for the occurred error, [ERROR_NONE] if none.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type_t* view);
 
 
@@ -159,14 +159,14 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
 /// @brief Sets the snake facing direction.
 /// @param snaken The snaken to apply the snake direction to.
 /// @param direction The direction to set the snake to.
-/// @return The code for the occurred error, [ERROR_NONE] if none.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t direction);
 
 /// @brief Applies the provided walls to the provided snaken's world.
 /// @param snaken The snaken to apply walls to.
 /// @param walls_length The length of the walls array.
 /// @param walls The array of walls.
-/// @return The code for the occurred error, [ERROR_NONE] if none.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t walls_length, snaken_world_size_t* walls);
 
 
@@ -175,7 +175,7 @@ snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t w
 /// @brief Moves the snake along its facing direction.
 /// @param snaken The snaken to compute the movement on.
 /// @param result The resulting snake head location.
-/// @return The code for the occurred error, [ERROR_NONE] if none.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken, snaken_world_size_t* result);
 
 snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result);
