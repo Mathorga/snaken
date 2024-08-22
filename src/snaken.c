@@ -1,4 +1,5 @@
 #include "snaken.h"
+#include "utils.h"
 
 
 // ########################################## Initialization functions ##########################################
@@ -22,10 +23,18 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
     }
 
     // Allocate apples.
-    (*snaken)->apples_length = 0;
+    (*snaken)->apples_length = DEFAULT_APPLES_LENGTH;
     (*snaken)->apples = (snaken_world_size_t*) malloc((*snaken)->apples_length * sizeof(snaken_world_size_t));
     if ((*snaken)->apples == NULL) {
         return SNAKEN_ERROR_FAILED_ALLOC;
+    }
+
+    // Populate apples.
+    for (snaken_world_size_t i = 0; i < (*snaken)->apples_length; i++) {
+        snaken_world_size_t apple_x = random(world_width);
+        snaken_world_size_t apple_y = random(world_height);
+
+        (*snaken)->apples[i] = IDX2D(apple_x, apple_y, world_width);
     }
 
     // Allocate snake body.
@@ -233,14 +242,19 @@ snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result
             // An apple was found, so eat it and increase the snake length:
             (*result) = SNAKEN_TRUE;
 
-            // Eat the apple.
-            snaken->apples_length--;
-            snaken_world_size_t* new_apples = realloc(snaken->apples, snaken->apples_length);
-            if (new_apples == NULL) {
-                return SNAKEN_ERROR_FAILED_ALLOC;
-            }
-            free(snaken->apples);
-            snaken->apples = new_apples;
+            // // Eat the apple.
+            // snaken->apples_length--;
+            // snaken_world_size_t* new_apples = realloc(snaken->apples, snaken->apples_length);
+            // if (new_apples == NULL) {
+            //     return SNAKEN_ERROR_FAILED_ALLOC;
+            // }
+            // free(snaken->apples);
+            // snaken->apples = new_apples;
+
+            // Eat the apple and spawn a new one.
+            snaken_world_size_t new_apple_x = random(snaken->world_width);
+            snaken_world_size_t new_apple_y = random(snaken->world_height);
+            snaken->apples[i] = IDX2D(new_apple_x, new_apple_y, snaken->world_width);
 
             // Increase the snake length.
             snaken->snake_length++;
