@@ -257,12 +257,12 @@ snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result
 
             // Increase the snake length.
             snaken->snake_length++;
-            snaken_world_size_t* new_snake_body = (snaken_world_size_t*) realloc(snaken->snake_body, snaken->snake_length * sizeof(snaken_world_size_t));
-            if (new_snake_body == NULL) {
+            snaken->snake_body = (snaken_world_size_t*) realloc(snaken->snake_body, snaken->snake_length * sizeof(snaken_world_size_t));
+            if (snaken->snake_body == NULL) {
                 return SNAKEN_ERROR_FAILED_ALLOC;
             }
-            free(snaken->snake_body);
-            snaken->snake_body = new_snake_body;
+            // free(snaken->snake_body);
+            // snaken->snake_body = new_snake_body;
 
             break;
         }
