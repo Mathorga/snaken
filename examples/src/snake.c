@@ -1,11 +1,11 @@
 #include <raylib.h>
-#include <snaken.h>
+#include <snaken/snaken.h>
 
 int main(void) {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenWidth = 400;
+    const int screenHeight = 250;
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
 

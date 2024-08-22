@@ -75,7 +75,7 @@ uninstall: clean
 std: create build
 
 # Builds all library files.
-build: cortex.o utils.o population.o snaken.o
+build: snaken.o
 	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BLD_DIR)/libsnaken.so
 	$(ARC) $(ARC_FLAGS) $(BLD_DIR)/libsnaken.a $(OBJS)
 	@printf "\nCompiled $@!\n"

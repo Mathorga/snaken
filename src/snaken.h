@@ -10,6 +10,7 @@ Copyright (C) 2024 Luka Micheletti
 #define __SNAKEN__
 
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "error.h"
 
@@ -175,7 +176,7 @@ snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t w
 /// @param snaken The snaken to compute the movement on.
 /// @param result The resulting snake head location.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
-snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken, snaken_world_size_t* result);
+snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken);
 
 snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result);
 

@@ -203,24 +203,27 @@ snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken) {
 
     // Update the snake body accordingly without reallocating it.
     for (snaken_world_size_t i = 1; i < snaken->snake_length; i++) {
-        // Save the current snake body section location.
-        section_location = snaken->snake_body[i];
+        // Temporarily save the current body section location.
+        snaken_world_size_t old_location = snaken->snake_body[i];
 
-        // Update the body section.
-        snaken->snake_body[i] = snaken->snake_body[i - 1];
+        // Update the body section location with the old location of the last visited body section.
+        snaken->snake_body[i] = section_location;
+
+        // Save the current snake body section location for the next body section.
+        section_location = old_location;
     }
 
     return SNAKEN_ERROR_NONE;
 }
 
 snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result) {
-    result = SNAKEN_FALSE;
+    (*result) = SNAKEN_FALSE;
 
     for (snaken_world_size_t i = 0; i < snaken->apples_length; i++) {
         // The snake head can be at most on one apple, so leave as soon as one is found.
         if (snaken->snake_body[0] == snaken->apples[i]) {
             // An apple was found, so eat it and increase the snake length:
-            result = SNAKEN_TRUE;
+            (*result) = SNAKEN_TRUE;
 
             // Eat the apple.
             snaken->apples_length--;
@@ -248,13 +251,13 @@ snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result
 }
 
 snaken_error_code_t snaken2d_hit_wall(snaken2d_t* snaken, snaken_bool_t* result) {
-    result = SNAKEN_FALSE;
+    (*result) = SNAKEN_FALSE;
 
     for (snaken_world_size_t i = 0; i < snaken->walls_length; i++) {
         // The snake head can be at most on one wall, so leave as soon as one is found.
         if (snaken->snake_body[0] == snaken->walls[i]) {
             // A wall was found, so hit it and let the snake die:
-            result = SNAKEN_TRUE;
+            (*result) = SNAKEN_TRUE;
 
             // Let the snake die.
             snaken->snake_alive = SNAKEN_FALSE;
@@ -267,14 +270,14 @@ snaken_error_code_t snaken2d_hit_wall(snaken2d_t* snaken, snaken_bool_t* result)
 }
 
 snaken_error_code_t snaken2d_eat_body(snaken2d_t* snaken, snaken_bool_t* result) {
-    result = SNAKEN_FALSE;
+    (*result) = SNAKEN_FALSE;
 
     // Start from 1 since the first element is actually the snake head.
     for (snaken_world_size_t i = 1; i < snaken->snake_length; i++) {
         // The snake head can be at most on one wall, so leave as soon as one is found.
         if (snaken->snake_body[0] == snaken->snake_body[i]) {
             // A wall was found, so hit it and let the snake die:
-            result = SNAKEN_TRUE;
+            (*result) = SNAKEN_TRUE;
 
             // Let the snake die.
             snaken->snake_alive = SNAKEN_FALSE;

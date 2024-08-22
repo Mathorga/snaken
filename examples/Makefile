@@ -4,10 +4,7 @@ STD_CCOMP_FLAGS=-std=c17 -Wall -pedantic -g
 CCOMP_FLAGS=$(STD_CCOMP_FLAGS)
 CLINK_FLAGS=-Wall
 
-STD_LIBS=-lm
-GRAPHICS_LIBS=-lraylib
-SPIKES_COUNT_LIBS=-lncurses
-SNAKEN_LIBS=-lsnaken
+LIBS=-lraylib -lm -lGL -lpthread -ldl -lrt -lX11 -lsnaken
 
 SRC_DIR=./src
 BLD_DIR=./bld
@@ -20,26 +17,15 @@ OBJS=$(patsubst %.o,$(BLD_DIR)/%.o,$@.o)
 MKDIR=mkdir -p
 RM=rm -rf
 
-# Check what the current operating system is.
-UNAME_S=$(shell uname -s)
-
-# The curren OS is Linux.
-ifeq ($(UNAME_S),Linux)
-	STD_LIBS+=-lrt
-endif
-
-# The current OS is MacOS.
-ifeq ($(UNAME_S),Darwin)
-	CCOMP_FLAGS+=-I/usr/local/include
-	CLINK_FLAGS+=-L/usr/local/lib
-endif
+CCOMP_FLAGS+=-I/usr/local/include
+CLINK_FLAGS+=-L/usr/local/lib
 
 all: clean snake
 
 snake: create
 	@printf "\n"
 	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
-	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(STD_LIBS) $(SNAKEN_LIBS)
+	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(LIBS)
 	@printf "\nCreated $@!\n"
 
 create:
