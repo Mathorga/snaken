@@ -69,7 +69,7 @@ typedef enum {
 #define DEFAULT_SNAKE_SPEED 0x7F
 #define DEFAULT_SNAKE_VIEW_RADIUS 0x02
 #define STARTING_SNAKE_LENGTH 0x05
-#define STARTING_SNAKE_DIR UP
+#define STARTING_SNAKE_DIR SNAKEN_UP
 
 typedef struct {
     // ################ World properties ################
