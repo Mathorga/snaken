@@ -216,6 +216,12 @@ snaken_error_code_t snaken2d_set_snake_speed(snaken2d_t* snaken, snaken_snake_sp
     return SNAKEN_ERROR_NONE;
 }
 
+snaken_error_code_t snaken2d_set_snake_stamina(snaken2d_t* snaken, snaken_snake_stamina_t stamina) {
+    snaken->snake_stamina = stamina;
+
+    return SNAKEN_ERROR_NONE;
+}
+
 snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t walls_length, snaken_world_size_t* walls) {
     // TODO.
     return SNAKEN_ERROR_NONE;

@@ -89,6 +89,7 @@ int main(void) {
 
             // Draw snake length.
             DrawText(TextFormat("Length: %i", snaken->snake_length), 10, 10, 20, WHITE);
+            DrawText(TextFormat("speed: %i", ~snaken->snake_speed), 10, 30, 20, WHITE);
 
         EndDrawing();
         //----------------------------------------------------------------------------------

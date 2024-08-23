@@ -44,9 +44,9 @@ extern "C" {
 // |n| is the size of the second dimension.
 #define IDX3D(i, j, k, m, n) (((m) * (n) * (k)) + ((m) * (j)) + (i))
 
-typedef int32_t snaken_world_size_t;
+typedef uint32_t snaken_world_size_t;
 typedef uint8_t snaken_snake_speed_t;
-typedef uint8_t snaken_snake_hunger_t;
+typedef uint8_t snaken_snake_stamina_t;
 
 typedef enum {
     SNAKEN_FALSE = 0x00,
@@ -115,10 +115,10 @@ typedef struct {
     snaken_snake_speed_t snake_speed_buildup;
 
     // Snake hunger. Goes from 0x00 to 0xFF, where 0x00 means the snake never shrinks from hunger and 0xFF Means the snake shrihks once every time step.
-    snaken_snake_hunger_t snake_stamina;
+    snaken_snake_stamina_t snake_stamina;
 
     // Hunger buildup. Increases at every time step and gets back to 0 when the snake eats an apple.
-    snaken_snake_hunger_t snake_stamina_buildup;
+    snaken_snake_stamina_t snake_stamina_buildup;
 
     // The current snake direction.
     snaken_dir_t snake_direction;
@@ -174,11 +174,17 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t direction);
 
-/// @brief Sets the speed of the snake in the provided snaken.
+/// @brief Sets the snake speed in the provided snaken.
 /// @param snaken The snaken to apply the new speed to.
 /// @param speed The new speed to apply.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_set_snake_speed(snaken2d_t* snaken, snaken_snake_speed_t speed);
+
+/// @brief Sets the snake stamina in the provided snaken.
+/// @param snaken The snaken to apply the new stamina to.
+/// @param stamina The new stamina to apply.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+snaken_error_code_t snaken2d_set_snake_stamina(snaken2d_t* snaken, snaken_snake_stamina_t stamina);
 
 /// @brief Applies the provided walls to the provided snaken's world.
 /// @param snaken The snaken to apply walls to.
