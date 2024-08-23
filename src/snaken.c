@@ -303,6 +303,11 @@ snaken_error_code_t snaken2d_hit_wall(snaken2d_t* snaken, snaken_bool_t* result)
 snaken_error_code_t snaken2d_eat_body(snaken2d_t* snaken, snaken_bool_t* result) {
     (*result) = SNAKEN_FALSE;
 
+    // Make sure no check is performed if so specified.
+    if (!snaken->self_intersection) {
+        return SNAKEN_ERROR_NONE;
+    }
+
     // Start from 1 since the first element is actually the snake head.
     for (snaken_world_size_t i = 1; i < snaken->snake_length; i++) {
         // The snake head can be at most on one wall, so leave as soon as one is found.
