@@ -68,7 +68,7 @@ typedef enum {
     SNAKEN_WALL = 0x04
 } snaken_cell_type_t;
 
-#define DEFAULT_SNAKE_SPEED 0x7F
+#define DEFAULT_SNAKE_SPEED 0xFE
 #define DEFAULT_SNAKE_STAMINA 0x7F
 #define DEFAULT_SNAKE_VIEW_RADIUS 0x02
 #define DEFAULT_APPLES_LENGTH 0x05
@@ -111,11 +111,14 @@ typedef struct {
     // Snake speed. Goes from 0x00 to 0xFF, where 0x00 means the snake does not move and 0xFF means the snake moves once every time step.
     snaken_snake_speed_t snake_speed;
 
+    // Snake speed buildup. Increases at every time step and gets back to 0 when the snake moves.
+    snaken_snake_speed_t snake_speed_buildup;
+
     // Snake hunger. Goes from 0x00 to 0xFF, where 0x00 means the snake never shrinks from hunger and 0xFF Means the snake shrihks once every time step.
     snaken_snake_hunger_t snake_stamina;
 
     // Hunger buildup. Increases at every time step and gets back to 0 when the snake eats an apple.
-    snaken_snake_hunger_t snake_hunger;
+    snaken_snake_hunger_t snake_stamina_buildup;
 
     // The current snake direction.
     snaken_dir_t snake_direction;

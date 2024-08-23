@@ -52,8 +52,9 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
     }
 
     (*snaken)->snake_speed = DEFAULT_SNAKE_SPEED;
+    (*snaken)->snake_speed_buildup = 0;
     (*snaken)->snake_stamina = DEFAULT_SNAKE_STAMINA;
-    (*snaken)->snake_hunger = 0;
+    (*snaken)->snake_stamina_buildup = 0;
     (*snaken)->snake_direction = STARTING_SNAKE_DIR;
     (*snaken)->self_intersection = SNAKEN_FALSE;
     (*snaken)->snake_alive = SNAKEN_TRUE;
@@ -105,10 +106,10 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
     }
 
     // 5: Check for hunger.
-    snaken->snake_hunger++;
-    if (snaken->snake_hunger > snaken->snake_stamina) {
+    snaken->snake_stamina_buildup++;
+    if (snaken->snake_stamina_buildup > snaken->snake_stamina) {
         // Reset hunger.
-        snaken->snake_hunger = 0;
+        snaken->snake_stamina_buildup = 0;
 
         // Decrease the snake length.
         snaken->snake_length--;
@@ -213,6 +214,15 @@ snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t dire
 // ########################################## Util functions ##########################################
 
 snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken) {
+    snaken->snake_speed_buildup++;
+
+    if (snaken->snake_speed_buildup <= ~snaken->snake_speed) {
+        return SNAKEN_ERROR_NONE;
+    }
+
+    // Reset speed buildup and then move the snake.
+    snaken->snake_speed_buildup = 0;
+
     // Save the previous head location in order to move its neck to it.
     snaken_world_size_t section_location = snaken->snake_body[0];
 
