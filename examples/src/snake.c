@@ -29,7 +29,7 @@ int main(void) {
     //---------------------------------------------------------------------------------
 
     // Main game loop
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose() && snaken->snake_alive) {
         // Update
         //----------------------------------------------------------------------------------
         // Check for user input.

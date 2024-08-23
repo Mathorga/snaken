@@ -52,6 +52,8 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
     }
 
     (*snaken)->snake_speed = DEFAULT_SNAKE_SPEED;
+    (*snaken)->snake_stamina = DEFAULT_SNAKE_STAMINA;
+    (*snaken)->snake_hunger = 0;
     (*snaken)->snake_direction = STARTING_SNAKE_DIR;
     (*snaken)->self_intersection = SNAKEN_FALSE;
     (*snaken)->snake_alive = SNAKEN_TRUE;
@@ -100,6 +102,20 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
     error = snaken2d_eat_body(snaken, &body_found);
     if (error != SNAKEN_ERROR_NONE) {
         return error;
+    }
+
+    // 5: Check for hunger.
+    snaken->snake_hunger++;
+    if (snaken->snake_hunger > snaken->snake_stamina) {
+        // Reset hunger.
+        snaken->snake_hunger = 0;
+
+        // Decrease the snake length.
+        snaken->snake_length--;
+        snaken->snake_body = (snaken_world_size_t*) realloc(snaken->snake_body, snaken->snake_length * sizeof(snaken_world_size_t));
+        if (snaken->snake_body == NULL) {
+            return SNAKEN_ERROR_FAILED_ALLOC;
+        }
     }
 
     return SNAKEN_ERROR_NONE;
@@ -252,8 +268,6 @@ snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result
             if (snaken->snake_body == NULL) {
                 return SNAKEN_ERROR_FAILED_ALLOC;
             }
-            // free(snaken->snake_body);
-            // snaken->snake_body = new_snake_body;
 
             break;
         }
