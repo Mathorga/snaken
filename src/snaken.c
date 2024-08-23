@@ -116,6 +116,11 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
         if (snaken->snake_body == NULL) {
             return SNAKEN_ERROR_FAILED_ALLOC;
         }
+
+        // Let the snake die of hunger.
+        if (snaken->snake_length <= 0) {
+            snaken->snake_alive = SNAKEN_FALSE;
+        }
     }
 
     return SNAKEN_ERROR_NONE;
