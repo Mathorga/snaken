@@ -5,8 +5,8 @@
 int main(void) {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int world_width = 20;
-    const int world_height = 20;
+    const int world_width = 40;
+    const int world_height = 40;
 
     const int cell_width = 10;
     const int cell_height = 10;
@@ -25,7 +25,7 @@ int main(void) {
 
     InitWindow(screen_width, screen_height, "Snake");
 
-    SetTargetFPS(15);
+    SetTargetFPS(60);
     //---------------------------------------------------------------------------------
 
     // Main game loop
@@ -61,7 +61,9 @@ int main(void) {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+
             ClearBackground(BLACK);
+
             // Draw snake (tail to head in order to always show the head on top).
             for (snaken_world_size_t i = snaken->snake_length - 1; i >= 0; i--) {
                 snaken_world_size_t i_x = snaken->snake_body[i] % snaken->world_width;
