@@ -216,7 +216,7 @@ snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t dire
 snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken) {
     snaken->snake_speed_buildup++;
 
-    if (snaken->snake_speed_buildup <= ~snaken->snake_speed) {
+    if (snaken->snake_speed_buildup < ~snaken->snake_speed) {
         return SNAKEN_ERROR_NONE;
     }
 
