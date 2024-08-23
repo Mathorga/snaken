@@ -241,15 +241,6 @@ snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result
             // An apple was found, so eat it and increase the snake length:
             (*result) = SNAKEN_TRUE;
 
-            // // Eat the apple.
-            // snaken->apples_length--;
-            // snaken_world_size_t* new_apples = realloc(snaken->apples, snaken->apples_length);
-            // if (new_apples == NULL) {
-            //     return SNAKEN_ERROR_FAILED_ALLOC;
-            // }
-            // free(snaken->apples);
-            // snaken->apples = new_apples;
-
             // Eat the apple and spawn a new one.
             snaken_world_size_t new_apple_x = rand() % snaken->world_width;
             snaken_world_size_t new_apple_y = rand() % snaken->world_height;
