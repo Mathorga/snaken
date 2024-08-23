@@ -5,14 +5,18 @@
 int main(void) {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int world_width = 60;
-    const int world_height = 60;
+    const int world_width = 30;
+    const int world_height = 30;
 
     const int cell_width = 10;
     const int cell_height = 10;
 
     int screen_width = world_width * cell_width;
     int screen_height = world_height * cell_height;
+
+    Color snake_head_color = (Color) {0x7F, 0xFF, 0x55, 0xFF};
+    Color snake_body_color = (Color) {0x00, 0x7F, 0x55, 0xFF};
+    Color apple_color = (Color) {0xFF, 0x5A, 0x5A, 0xFF};
 
     snaken_error_code_t error;
 
@@ -23,13 +27,13 @@ int main(void) {
         return 1;
     }
 
-    error = snaken2d_set_snake_speed(snaken, 0xF6);
+    error = snaken2d_set_snake_speed(snaken, 0xF5);
     if (error != SNAKEN_ERROR_NONE) {
        printf("There was an error updating the snake speed: %d\n", error);
        return 1;
     }
 
-    error = snaken2d_set_snake_stamina(snaken, 0xFE);
+    error = snaken2d_set_snake_stamina(snaken, 0xF0);
     if (error != SNAKEN_ERROR_NONE) {
        printf("There was an error updating the snake stamina: %d\n", error);
        return 1;
@@ -91,7 +95,7 @@ int main(void) {
                 snaken_world_size_t section_location_x = snaken->snake_body[i] % snaken->world_width;
                 snaken_world_size_t section_location_y = snaken->snake_body[i] / snaken->world_width;
 
-                DrawRectangle(section_location_x * cell_width, section_location_y * cell_height, cell_width, cell_height, i == 0 ? YELLOW : GREEN);
+                DrawRectangle(section_location_x * cell_width, section_location_y * cell_height, cell_width, cell_height, i == 0 ? snake_head_color : snake_body_color);
             }
 
             // Draw apples.
@@ -99,7 +103,7 @@ int main(void) {
                 snaken_world_size_t apple_location_x = snaken->apples[i] % snaken->world_width;
                 snaken_world_size_t apple_location_y = snaken->apples[i] / snaken->world_width;
 
-                DrawRectangle(apple_location_x * cell_width, apple_location_y * cell_height, cell_width, cell_height, RED);
+                DrawRectangle(apple_location_x * cell_width, apple_location_y * cell_height, cell_width, cell_height, apple_color);
             }
 
             // Draw snake length.

@@ -323,6 +323,9 @@ snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result
                 return SNAKEN_ERROR_FAILED_ALLOC;
             }
 
+            // Reset stamina step.
+            snaken->snake_stamina_step = 0;
+
             break;
         }
     }
