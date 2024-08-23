@@ -61,13 +61,13 @@ int main(void) {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-            ClearBackground(RAYWHITE);
-            // Draw snake.
-            for (snaken_world_size_t i = 0; i < snaken->snake_length; i++) {
+            ClearBackground(BLACK);
+            // Draw snake (tail to head in order to always show the head on top).
+            for (snaken_world_size_t i = snaken->snake_length - 1; i >= 0; i--) {
                 snaken_world_size_t i_x = snaken->snake_body[i] % snaken->world_width;
                 snaken_world_size_t i_y = snaken->snake_body[i] / snaken->world_width;
 
-                DrawRectangle(i_x * cell_width, i_y * cell_height, cell_width, cell_height, GREEN);
+                DrawRectangle(i_x * cell_width, i_y * cell_height, cell_width, cell_height, i == 0 ? YELLOW : GREEN);
             }
 
             // Draw apples.
@@ -76,10 +76,11 @@ int main(void) {
                 snaken_world_size_t i_y = snaken->apples[i] / snaken->world_width;
 
                 DrawRectangle(i_x * cell_width, i_y * cell_height, cell_width, cell_height, RED);
+                //DrawCircle(i_x * cell_width + cell_width / 2, i_y * cell_height + cell_height / 2, cell_width / 2, RED);
             }
 
             // Draw snake length.
-            DrawText(TextFormat("Length: %08i", snaken->snake_length, 20, 20, 20, BLACK));
+            DrawText(TextFormat("Length: %i", snaken->snake_length), 10, 10, 20, WHITE);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
