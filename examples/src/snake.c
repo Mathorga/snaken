@@ -22,6 +22,12 @@ int main(void) {
         printf("There was an error initializing the snaken: %d\n", error);
         return 1;
     }
+    error = snaken2d_set_snake_speed(snaken, 0x0A);
+    if (error != SNAKEN_ERROR_NONE) {
+        printf("There was an error updating the snake speed: %d\n", error);
+        return 1;
+    }
+    
 
     InitWindow(screen_width, screen_height, "Snake");
 

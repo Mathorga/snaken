@@ -210,6 +210,17 @@ snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t dire
     return SNAKEN_ERROR_NONE;
 }
 
+snaken_error_code_t snaken2d_set_snake_speed(snaken2d_t* snaken, snaken_snake_speed_t speed) {
+    snaken->snake_speed = speed;
+
+    return SNAKEN_ERROR_NONE;
+}
+
+snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t walls_length, snaken_world_size_t* walls) {
+    // TODO.
+    return SNAKEN_ERROR_NONE;
+}
+
 
 // ########################################## Util functions ##########################################
 

@@ -174,6 +174,12 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t direction);
 
+/// @brief Sets the speed of the snake in the provided snaken.
+/// @param snaken The snaken to apply the new speed to.
+/// @param speed The new speed to apply.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+snaken_error_code_t snaken2d_set_snake_speed(snaken2d_t* snaken, snaken_snake_speed_t speed);
+
 /// @brief Applies the provided walls to the provided snaken's world.
 /// @param snaken The snaken to apply walls to.
 /// @param walls_length The length of the walls array.
