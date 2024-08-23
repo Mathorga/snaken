@@ -5,8 +5,8 @@
 int main(void) {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int world_width = 40;
-    const int world_height = 40;
+    const int world_width = 60;
+    const int world_height = 60;
 
     const int cell_width = 10;
     const int cell_height = 10;
@@ -22,12 +22,24 @@ int main(void) {
         printf("There was an error initializing the snaken: %d\n", error);
         return 1;
     }
-    error = snaken2d_set_snake_speed(snaken, 0x0A);
+
+    error = snaken2d_set_snake_speed(snaken, 0xF6);
     if (error != SNAKEN_ERROR_NONE) {
-        printf("There was an error updating the snake speed: %d\n", error);
-        return 1;
+       printf("There was an error updating the snake speed: %d\n", error);
+       return 1;
     }
-    
+
+    error = snaken2d_set_snake_stamina(snaken, 0xFE);
+    if (error != SNAKEN_ERROR_NONE) {
+       printf("There was an error updating the snake stamina: %d\n", error);
+       return 1;
+    }
+
+    error = snaken2d_set_apples_count(snaken, 0x0F);
+    if (error != SNAKEN_ERROR_NONE) {
+       printf("There was an error setting the amount of apples: %d\n", error);
+       return 1;
+    }
 
     InitWindow(screen_width, screen_height, "Snake");
 
@@ -41,15 +53,19 @@ int main(void) {
         // Check for user input.
         switch(GetKeyPressed()) {
             case KEY_UP:
+            case KEY_W:
                 snaken2d_set_snake_dir(snaken, SNAKEN_UP);
                 break;
-	    case KEY_LEFT:
+            case KEY_LEFT:
+            case KEY_A:
                 snaken2d_set_snake_dir(snaken, SNAKEN_LEFT);
                 break;
             case KEY_DOWN:
+            case KEY_S:
                 snaken2d_set_snake_dir(snaken, SNAKEN_DOWN);
                 break;
             case KEY_RIGHT:
+            case KEY_D:
                 snaken2d_set_snake_dir(snaken, SNAKEN_RIGHT);
                 break;
             default:
@@ -71,25 +87,27 @@ int main(void) {
             ClearBackground(BLACK);
 
             // Draw snake (tail to head in order to always show the head on top).
-            for (snaken_world_size_t i = snaken->snake_length - 1; i >= 0; i--) {
-                snaken_world_size_t i_x = snaken->snake_body[i] % snaken->world_width;
-                snaken_world_size_t i_y = snaken->snake_body[i] / snaken->world_width;
+            for (int i = snaken->snake_length - 1; i >= 0; i--) {
+                snaken_world_size_t section_location_x = snaken->snake_body[i] % snaken->world_width;
+                snaken_world_size_t section_location_y = snaken->snake_body[i] / snaken->world_width;
 
-                DrawRectangle(i_x * cell_width, i_y * cell_height, cell_width, cell_height, i == 0 ? YELLOW : GREEN);
+                DrawRectangle(section_location_x * cell_width, section_location_y * cell_height, cell_width, cell_height, i == 0 ? YELLOW : GREEN);
             }
 
             // Draw apples.
-            for (snaken_world_size_t i = 0; i < snaken->apples_length; i++) {
-                snaken_world_size_t i_x = snaken->apples[i] % snaken->world_width;
-                snaken_world_size_t i_y = snaken->apples[i] / snaken->world_width;
+            for (int i = 0; i < snaken->apples_length; i++) {
+                snaken_world_size_t apple_location_x = snaken->apples[i] % snaken->world_width;
+                snaken_world_size_t apple_location_y = snaken->apples[i] / snaken->world_width;
 
-                DrawRectangle(i_x * cell_width, i_y * cell_height, cell_width, cell_height, RED);
-                //DrawCircle(i_x * cell_width + cell_width / 2, i_y * cell_height + cell_height / 2, cell_width / 2, RED);
+                DrawRectangle(apple_location_x * cell_width, apple_location_y * cell_height, cell_width, cell_height, RED);
             }
 
             // Draw snake length.
             DrawText(TextFormat("Length: %i", snaken->snake_length), 10, 10, 20, WHITE);
-            DrawText(TextFormat("speed: %i", ~snaken->snake_speed), 10, 30, 20, WHITE);
+            DrawText(TextFormat("speed: %i", snaken->snake_speed), 10, 30, 20, WHITE);
+            DrawText(TextFormat("speed_step: %i", snaken->snake_speed_step), 10, 50, 20, WHITE);
+            DrawText(TextFormat("stamina: %i", snaken->snake_stamina), 10, 70, 20, WHITE);
+            DrawText(TextFormat("stamina_step: %i", snaken->snake_stamina_step), 10, 90, 20, WHITE);
 
         EndDrawing();
         //----------------------------------------------------------------------------------

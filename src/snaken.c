@@ -52,9 +52,9 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
     }
 
     (*snaken)->snake_speed = DEFAULT_SNAKE_SPEED;
-    (*snaken)->snake_speed_buildup = 0;
+    (*snaken)->snake_speed_step = 0;
     (*snaken)->snake_stamina = DEFAULT_SNAKE_STAMINA;
-    (*snaken)->snake_stamina_buildup = 0;
+    (*snaken)->snake_stamina_step = 0;
     (*snaken)->snake_direction = STARTING_SNAKE_DIR;
     (*snaken)->self_intersection = SNAKEN_FALSE;
     (*snaken)->snake_alive = SNAKEN_TRUE;
@@ -106,10 +106,10 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
     }
 
     // 5: Check for hunger.
-    snaken->snake_stamina_buildup++;
-    if (snaken->snake_stamina_buildup > snaken->snake_stamina) {
+    snaken->snake_stamina_step++;
+    if (snaken->snake_stamina_step > snaken->snake_stamina) {
         // Reset hunger.
-        snaken->snake_stamina_buildup = 0;
+        snaken->snake_stamina_step = 0;
 
         // Decrease the snake length.
         snaken->snake_length--;
@@ -222,6 +222,28 @@ snaken_error_code_t snaken2d_set_snake_stamina(snaken2d_t* snaken, snaken_snake_
     return SNAKEN_ERROR_NONE;
 }
 
+snaken_error_code_t snaken2d_set_apples_count(snaken2d_t* snaken, snaken_world_size_t apples_count) {
+    // Save the old count for later use.
+    snaken_world_size_t old_apples_count = snaken->apples_length;
+
+    // Resize the apples array.
+    snaken->apples_length = apples_count;
+    snaken->apples = (snaken_world_size_t*) realloc(snaken->apples, snaken->apples_length * sizeof(snaken_world_size_t));
+    if (snaken->apples == NULL) {
+        return SNAKEN_ERROR_FAILED_ALLOC;
+    }
+
+    // If the amount of apples increased, then spawn new ones.
+    for (snaken_world_size_t i = old_apples_count; i < snaken->apples_length; i++) {
+        snaken_world_size_t apple_x = rand() % snaken->world_width;
+        snaken_world_size_t apple_y = rand() & snaken->world_height;
+
+        snaken->apples[i] = IDX2D(apple_x, apple_y, snaken->world_width);
+    }
+
+    return SNAKEN_ERROR_NONE;
+}
+
 snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t walls_length, snaken_world_size_t* walls) {
     // TODO.
     return SNAKEN_ERROR_NONE;
@@ -231,14 +253,14 @@ snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t w
 // ########################################## Util functions ##########################################
 
 snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken) {
-    snaken->snake_speed_buildup++;
+    snaken->snake_speed_step++;
 
-    if (snaken->snake_speed_buildup < ~snaken->snake_speed) {
+    if (snaken->snake_speed_step < (snaken_snake_speed_t) (~snaken->snake_speed)) {
         return SNAKEN_ERROR_NONE;
     }
 
     // Reset speed buildup and then move the snake.
-    snaken->snake_speed_buildup = 0;
+    snaken->snake_speed_step = 0;
 
     // Save the previous head location in order to move its neck to it.
     snaken_world_size_t section_location = snaken->snake_body[0];

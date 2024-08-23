@@ -44,7 +44,7 @@ extern "C" {
 // |n| is the size of the second dimension.
 #define IDX3D(i, j, k, m, n) (((m) * (n) * (k)) + ((m) * (j)) + (i))
 
-typedef uint32_t snaken_world_size_t;
+typedef int32_t snaken_world_size_t;
 typedef uint8_t snaken_snake_speed_t;
 typedef uint8_t snaken_snake_stamina_t;
 
@@ -112,13 +112,13 @@ typedef struct {
     snaken_snake_speed_t snake_speed;
 
     // Snake speed buildup. Increases at every time step and gets back to 0 when the snake moves.
-    snaken_snake_speed_t snake_speed_buildup;
+    snaken_snake_speed_t snake_speed_step;
 
     // Snake hunger. Goes from 0x00 to 0xFF, where 0x00 means the snake never shrinks from hunger and 0xFF Means the snake shrihks once every time step.
     snaken_snake_stamina_t snake_stamina;
 
     // Hunger buildup. Increases at every time step and gets back to 0 when the snake eats an apple.
-    snaken_snake_stamina_t snake_stamina_buildup;
+    snaken_snake_stamina_t snake_stamina_step;
 
     // The current snake direction.
     snaken_dir_t snake_direction;
@@ -185,6 +185,12 @@ snaken_error_code_t snaken2d_set_snake_speed(snaken2d_t* snaken, snaken_snake_sp
 /// @param stamina The new stamina to apply.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_set_snake_stamina(snaken2d_t* snaken, snaken_snake_stamina_t stamina);
+
+/// @brief Sets the provided snaken world to have [apples_count] apples at any time step.
+/// @param snaken The snaken to apply changes to.
+/// @param apples_count The amount of apples to be present at any time in the snaken world.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+snaken_error_code_t snaken2d_set_apples_count(snaken2d_t* snaken, snaken_world_size_t apples_count);
 
 /// @brief Applies the provided walls to the provided snaken's world.
 /// @param snaken The snaken to apply walls to.
