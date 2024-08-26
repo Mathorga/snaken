@@ -17,6 +17,7 @@ int main(void) {
     Color snake_head_color = (Color) {0x7F, 0xFF, 0x55, 0xFF};
     Color snake_body_color = (Color) {0x00, 0x7F, 0x55, 0xFF};
     Color apple_color = (Color) {0xFF, 0x5A, 0x5A, 0xFF};
+    Color wall_color = (Color) {0xFF, 0xFF, 0xFF, 0xFF};
 
     snaken_error_code_t error;
 
@@ -96,6 +97,14 @@ int main(void) {
                 snaken_world_size_t section_location_y = snaken->snake_body[i] / snaken->world_width;
 
                 DrawRectangle(section_location_x * cell_width, section_location_y * cell_height, cell_width, cell_height, i == 0 ? snake_head_color : snake_body_color);
+            }
+
+            // Draw walls.
+            for (int i = 0; i < snaken->walls_length; i++) {
+                snaken_world_size_t wall_location_x = snaken->walls[i] % snaken->world_width;
+                snaken_world_size_t wall_location_y = snaken->walls[i] / snaken->world_width;
+
+                DrawRectangle(wall_location_x * cell_width, wall_location_y * cell_height, cell_width, cell_height, wall_color);
             }
 
             // Draw apples.
