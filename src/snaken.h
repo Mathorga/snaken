@@ -151,11 +151,6 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_tick(snaken2d_t* snaken);
 
-/// @brief Spawns a single apple at a random location.
-/// @param snaken The snaken in which to spawn the apple.
-/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
-snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken);
-
 
 // ########################################## Getter functions ##########################################
 
@@ -191,6 +186,12 @@ snaken_error_code_t snaken2d_set_snake_stamina(snaken2d_t* snaken, snaken_snake_
 /// @param apples_count The amount of apples to be present at any time in the snaken world.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_set_apples_count(snaken2d_t* snaken, snaken_world_size_t apples_count);
+
+/// @brief Updates the location of the apple at the provided index while avoiding putting it on walls.
+/// @param snaken The snaken to apply changes to.
+/// @param index The index of the apple to update.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken, snaken_world_size_t index);
 
 /// @brief Applies the provided walls to the provided snaken's world.
 /// @param snaken The snaken to apply walls to.

@@ -30,10 +30,7 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 
     // Populate apples.
     for (snaken_world_size_t i = 0; i < (*snaken)->apples_length; i++) {
-        snaken_world_size_t apple_x = rand() % world_width;
-        snaken_world_size_t apple_y = rand() & world_height;
-
-        (*snaken)->apples[i] = IDX2D(apple_x, apple_y, world_width);
+        snaken2d_spawn_apple(*snaken, i);
     }
 
     // Allocate snake body.
@@ -127,11 +124,6 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
     return SNAKEN_ERROR_NONE;
 }
 
-snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken) {
-    // TODO.
-    return SNAKEN_ERROR_NONE;
-}
-
 
 // ########################################## Getter functions ##########################################
 
@@ -222,6 +214,37 @@ snaken_error_code_t snaken2d_set_snake_stamina(snaken2d_t* snaken, snaken_snake_
     return SNAKEN_ERROR_NONE;
 }
 
+snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken, snaken_world_size_t index) {
+    // Make sure the provided index is in range.
+    if (index > snaken->world_width * snaken->world_height) {
+        return SNAKEN_ERROR_INDEX_OUT_OF_RANGE;
+    }
+
+    // Setup variables for location generation.
+    snaken_world_size_t apple_x;
+    snaken_world_size_t apple_y;
+    snaken_world_size_t apple_location;
+    snaken_bool_t location_free = SNAKEN_TRUE;
+
+    do {
+        // Compute a random location for the apple.
+        apple_x = rand() % snaken->world_width;
+        apple_y = rand() & snaken->world_height;
+        apple_location = IDX2D(apple_x, apple_y, snaken->world_width);
+
+        // Make sure the picked location is free from walls.
+        for (snaken_world_size_t i = 0; i < snaken->walls_length; i++) {
+            if (snaken->walls[i] == apple_location) {
+                location_free = SNAKEN_FALSE;
+                break;
+            }
+        }
+    } while(!location_free);
+
+    snaken->apples[index] = apple_location;
+    return SNAKEN_ERROR_NONE;
+}
+
 snaken_error_code_t snaken2d_set_apples_count(snaken2d_t* snaken, snaken_world_size_t apples_count) {
     // Save the old count for later use.
     snaken_world_size_t old_apples_count = snaken->apples_length;
@@ -235,10 +258,7 @@ snaken_error_code_t snaken2d_set_apples_count(snaken2d_t* snaken, snaken_world_s
 
     // If the amount of apples increased, then spawn new ones.
     for (snaken_world_size_t i = old_apples_count; i < snaken->apples_length; i++) {
-        snaken_world_size_t apple_x = rand() % snaken->world_width;
-        snaken_world_size_t apple_y = rand() & snaken->world_height;
-
-        snaken->apples[i] = IDX2D(apple_x, apple_y, snaken->world_width);
+        snaken2d_spawn_apple(snaken, i);
     }
 
     return SNAKEN_ERROR_NONE;
@@ -341,9 +361,7 @@ snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result
             (*result) = SNAKEN_TRUE;
 
             // Eat the apple and spawn a new one.
-            snaken_world_size_t new_apple_x = rand() % snaken->world_width;
-            snaken_world_size_t new_apple_y = rand() % snaken->world_height;
-            snaken->apples[i] = IDX2D(new_apple_x, new_apple_y, snaken->world_width);
+            snaken2d_spawn_apple(snaken, i);
 
             // Increase the snake length.
             snaken->snake_length++;
