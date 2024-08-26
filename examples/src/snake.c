@@ -46,6 +46,17 @@ int main(void) {
        return 1;
     }
 
+    // Set up some walls.
+    snaken_world_size_t* walls = (snaken_world_size_t*) malloc(10 * sizeof(snaken_world_size_t));
+    if (walls == NULL) {
+        printf("ERROR allocating walls\n");
+        return 1;
+    }
+    for (snaken_world_size_t i = 0; i < 10; i++) {
+        walls[i] = IDX2D(i, 0, snaken->world_width);
+    }
+    snaken2d_set_walls(snaken, 10, walls);
+
     InitWindow(screen_width, screen_height, "Snake");
 
     SetTargetFPS(60);

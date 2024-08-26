@@ -245,7 +245,36 @@ snaken_error_code_t snaken2d_set_apples_count(snaken2d_t* snaken, snaken_world_s
 }
 
 snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t walls_length, snaken_world_size_t* walls) {
-    // TODO.
+    // Update the current walls length.
+    snaken->walls_length = walls_length;
+
+    // Free the existing walls.
+    free(snaken->walls);
+
+    // Store the provided walls.
+    snaken->walls = walls;
+
+    return SNAKEN_ERROR_NONE;
+}
+
+snaken_error_code_t snaken2d_add_walls(snaken2d_t* snaken, snaken_world_size_t walls_length, snaken_world_size_t* walls) {
+    // Save the previous length for later use.
+    snaken_world_size_t old_walls_length = snaken->walls_length;
+
+    // Increase the walls size.
+    snaken->walls_length += walls_length;
+
+    // Resize the walls array.
+    snaken->walls = (snaken_world_size_t*) realloc(snaken->walls, snaken->walls_length * sizeof(snaken_world_size_t));
+    if (snaken->walls == NULL) {
+        return SNAKEN_ERROR_FAILED_ALLOC;
+    }
+
+    // Add all provided walls.
+    for (snaken_world_size_t i = 0; i < walls_length; i++) {
+        snaken->walls[i + old_walls_length] = walls[i];
+    }
+
     return SNAKEN_ERROR_NONE;
 }
 

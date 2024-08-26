@@ -197,7 +197,17 @@ snaken_error_code_t snaken2d_set_apples_count(snaken2d_t* snaken, snaken_world_s
 /// @param walls_length The length of the walls array.
 /// @param walls The array of walls.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+/// @warning The provided walls will overwrite any existing walls. Use [snaken2d_add_walls] to add them instead.
 snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t walls_length, snaken_world_size_t* walls);
+
+
+/// @brief Adds the provided walls to the existing walls in the provided snaken's world.
+/// @param snaken The snaken to apply walls to.
+/// @param walls_length The length of the walls array to add.
+/// @param walls The array of walls to add.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+/// @warning The provided walls will not overwrite any existing walls. Use [snaken2d_set_walls] to overwrite them instead.
+snaken_error_code_t snaken2d_add_walls(snaken2d_t* snaken, snaken_world_size_t walls_length, snaken_world_size_t* walls);
 
 
 // ########################################## Util functions ##########################################
