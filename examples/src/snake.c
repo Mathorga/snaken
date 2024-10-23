@@ -2,6 +2,11 @@
 #include <raylib.h>
 #include <snaken/snaken.h>
 
+uint32_t map(uint32_t input, uint32_t input_start, uint32_t input_end, uint32_t output_start, uint32_t output_end) {
+    uint32_t slope = (output_end - output_start) / (input_end - input_start);
+    return output_start + slope * (input - input_start);
+}
+
 int main(void) {
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -107,7 +112,17 @@ int main(void) {
                 snaken_world_size_t section_location_x = snaken->snake_body[i] % snaken->world_width;
                 snaken_world_size_t section_location_y = snaken->snake_body[i] / snaken->world_width;
 
-                DrawRectangle(section_location_x * cell_width, section_location_y * cell_height, cell_width, cell_height, i == 0 ? snake_head_color : snake_body_color);
+                DrawRectangle(
+                    section_location_x * cell_width,
+                    section_location_y * cell_height,
+                    cell_width, cell_height,
+                    i == 0 ? snake_head_color : (Color) {
+                        map(i, 0, snaken->snake_length - 1, snake_body_color.r, snake_head_color.r),
+                        map(i, 0, snaken->snake_length - 1, snake_body_color.g, snake_head_color.g),
+                        map(i, 0, snaken->snake_length - 1, snake_body_color.b, snake_head_color.b),
+                        0xFF
+                    }
+                );
             }
 
             // Draw walls.
