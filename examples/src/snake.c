@@ -2,9 +2,8 @@
 #include <raylib.h>
 #include <snaken/snaken.h>
 
-uint32_t map(uint32_t input, uint32_t input_start, uint32_t input_end, uint32_t output_start, uint32_t output_end) {
-    uint32_t slope = (output_end - output_start) / (input_end - input_start);
-    return output_start + slope * (input - input_start);
+double lerp(double a, double b, double t) {
+    return a + t * (b - a);
 }
 
 int main(void) {
@@ -20,7 +19,7 @@ int main(void) {
     int screen_height = world_height * cell_height;
 
     Color snake_head_color = (Color) {0x7F, 0xFF, 0x55, 0xFF};
-    Color snake_body_color = (Color) {0x00, 0x7F, 0x55, 0xFF};
+    Color snake_tail_color = (Color) {0x11, 0x33, 0x44, 0xFF};
     Color apple_color = (Color) {0xFF, 0x5A, 0x5A, 0xFF};
     Color wall_color = (Color) {0xFF, 0xFF, 0xFF, 0xFF};
 
@@ -112,16 +111,20 @@ int main(void) {
                 snaken_world_size_t section_location_x = snaken->snake_body[i] % snaken->world_width;
                 snaken_world_size_t section_location_y = snaken->snake_body[i] / snaken->world_width;
 
+                double segment_position = ((double) i) / (snaken->snake_length - 1);
+
+                Color segment_color = (Color) {
+                    lerp(snake_head_color.r, snake_tail_color.r, segment_position),
+                    lerp(snake_head_color.g, snake_tail_color.g, segment_position),
+                    lerp(snake_head_color.b, snake_tail_color.b, segment_position),
+                    0xFF
+                };
+
                 DrawRectangle(
                     section_location_x * cell_width,
                     section_location_y * cell_height,
                     cell_width, cell_height,
-                    i == 0 ? snake_head_color : (Color) {
-                        map(i, 0, snaken->snake_length - 1, snake_body_color.r, snake_head_color.r),
-                        map(i, 0, snaken->snake_length - 1, snake_body_color.g, snake_head_color.g),
-                        map(i, 0, snaken->snake_length - 1, snake_body_color.b, snake_head_color.b),
-                        0xFF
-                    }
+                    segment_color
                 );
             }
 
