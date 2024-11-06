@@ -110,14 +110,9 @@ int main(void) {
          printf("There was an error selecting survivors: %d\n", bhm_error);
          return 1;
       }
-      bhm_error = p2d_crossover(cortices_pop);
+      bhm_error = p2d_crossover(cortices_pop, BHM_TRUE);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error crossing survivors over: %d\n", bhm_error);
-         return 1;
-      }
-      bhm_error = p2d_mutate(cortices_pop);
-      if (bhm_error != BHM_ERROR_NONE) {
-         printf("There was an error mutating the cortices: %d\n", bhm_error);
          return 1;
       }
    }
