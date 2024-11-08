@@ -20,9 +20,15 @@ RM=rm -rf
 CCOMP_FLAGS+=-I/usr/local/include
 CLINK_FLAGS+=-L/usr/local/lib
 
-all: clean snake
+all: clean snake bhm_snake
 
 snake: create
+	@printf "\n"
+	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
+	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(LIBS)
+	@printf "\nCreated $@!\n"
+
+bhm_snake: create
 	@printf "\n"
 	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
 	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(LIBS)
