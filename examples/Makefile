@@ -31,7 +31,7 @@ snake: create
 bhm_snake: create
 	@printf "\n"
 	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
-	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(LIBS)
+	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(LIBS) -lbehema
 	@printf "\nCreated $@!\n"
 
 create:
