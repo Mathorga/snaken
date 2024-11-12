@@ -133,7 +133,7 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
       bhm_cortex2d_t* next_cortex = i % 2 ? cortex : tmp_cortex;
 
       // Get snake view as input.
-      snaken_cell_type_t* view;
+      snaken_cell_type_t* view = (snaken_cell_type_t*) malloc(snaken_view_width * snaken_view_width * sizeof(snaken_cell_type_t));
       printf("Getting snake view\n");
       snaken_error = snaken2d_get_snake_view(snaken, view);
       printf("Got snake view\n");
@@ -186,6 +186,15 @@ int main(void) {
       0x0000FF,
       &eval_cortex
    );
+   if (bhm_error != BHM_ERROR_NONE) {
+      printf("There was an error initializing the population: %d\n", bhm_error);
+      return 1;
+   }
+   bhm_error = p2d_populate(cortices_pop, 256, 192, 2);
+   if (bhm_error != BHM_ERROR_NONE) {
+      printf("There was an error population the cortices: %d\n", bhm_error);
+      return 1;
+   }
    // ##########################################
    // ##########################################
 
