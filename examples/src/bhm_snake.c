@@ -134,9 +134,7 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
 
       // Get snake view as input.
       snaken_cell_type_t* view = (snaken_cell_type_t*) malloc(snaken_view_width * snaken_view_width * sizeof(snaken_cell_type_t));
-      printf("Getting snake view\n");
       snaken_error = snaken2d_get_snake_view(snaken, view);
-      printf("Got snake view\n");
       if (snaken_error != SNAKEN_ERROR_NONE) {
          printf("There was an error retrieving the snake view: %d\n", snaken_error);
          return BHM_ERROR_EXTERNAL_CAUSES;
@@ -148,26 +146,33 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
             input->values[IDX2D(x, y, input->x1 - input->x0)] = view[IDX2D(x, y, input->x1 - input->x0)];
          }
       }
-      printf("Feeding cortex %d\n", input->values[0]);
       c2d_feed2d(prev_cortex, input);
-      printf("Fed cortex\n");
 
-      // Run a single tick.
+      // Tick the cortex.
       c2d_tick(prev_cortex, next_cortex);
-      printf("Ticked \n");
+
+      // Make sure the snake is still alive before going on.
+      if (!snaken->snake_alive) break;
+      snaken_error = snaken2d_tick(snaken);
+      if (snaken_error != SNAKEN_ERROR_NONE) {
+         printf("There was an error running the snaken: %d\n", snaken_error);
+         return BHM_ERROR_EXTERNAL_CAUSES;
+      }
 
       // Read cortex output.
       c2d_read2d(next_cortex, left_output);
       c2d_read2d(next_cortex, right_output);
       o2d_mean(left_output, &mean_left_output);
       o2d_mean(left_output, &mean_right_output);
-      printf("mean output %d %d\n", mean_left_output, mean_right_output);
 
       // Use cortex output to control the snake.
       // TODO
    }
    // ##########################################
    // ##########################################
+
+   *fitness = snaken->snake_length;
+   printf("Evaluated the cortex: %d\n", *fitness);
 
    return BHM_ERROR_NONE;
 }

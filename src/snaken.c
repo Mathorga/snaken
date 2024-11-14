@@ -110,14 +110,18 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
 
         // Decrease the snake length.
         snaken->snake_length--;
-        snaken->snake_body = (snaken_world_size_t*) realloc(snaken->snake_body, snaken->snake_length * sizeof(snaken_world_size_t));
-        if (snaken->snake_body == NULL) {
-            return SNAKEN_ERROR_FAILED_ALLOC;
-        }
-
-        // Let the snake die of hunger.
         if (snaken->snake_length <= 0) {
+            // Let the snake die of hunger.
+            // Calling free instead of letting realloc free the snake body ensures memory is actually freed,
+            // since realloc's behavior with size 0 is implementation-specific, and therefore unpredictable.
+            free(snaken->snake_body);
             snaken->snake_alive = SNAKEN_FALSE;
+        } else {
+            // Chop the snake body off by one.
+            snaken->snake_body = (snaken_world_size_t*) realloc(snaken->snake_body, snaken->snake_length * sizeof(snaken_world_size_t));
+            if (snaken->snake_length > 0 && snaken->snake_body == NULL) {
+                return SNAKEN_ERROR_FAILED_ALLOC;
+            }
         }
     }
 
