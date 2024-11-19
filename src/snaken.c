@@ -206,6 +206,48 @@ snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t dire
     return SNAKEN_ERROR_NONE;
 }
 
+snaken_error_code_t snaken2d_turn_left(snaken2d_t* snaken) {
+    switch (snaken->snake_direction) {
+        case SNAKEN_UP:
+            snaken->snake_direction = SNAKEN_LEFT;
+            break;
+        case SNAKEN_LEFT:
+            snaken->snake_direction = SNAKEN_DOWN;
+            break;
+        case SNAKEN_DOWN:
+            snaken->snake_direction = SNAKEN_RIGHT;
+            break;
+        case SNAKEN_RIGHT:
+            snaken->snake_direction = SNAKEN_UP;
+            break;
+        default:
+            return SNAKEN_ERROR_INVALID_DIRECTION;
+    }
+
+    return SNAKEN_ERROR_NONE;
+}
+
+snaken_error_code_t snaken2d_turn_right(snaken2d_t* snaken) {
+    switch (snaken->snake_direction) {
+        case SNAKEN_UP:
+            snaken->snake_direction = SNAKEN_RIGHT;
+            break;
+        case SNAKEN_LEFT:
+            snaken->snake_direction = SNAKEN_UP;
+            break;
+        case SNAKEN_DOWN:
+            snaken->snake_direction = SNAKEN_LEFT;
+            break;
+        case SNAKEN_RIGHT:
+            snaken->snake_direction = SNAKEN_DOWN;
+            break;
+        default:
+            return SNAKEN_ERROR_INVALID_DIRECTION;
+    }
+
+    return SNAKEN_ERROR_NONE;
+}
+
 snaken_error_code_t snaken2d_set_snake_speed(snaken2d_t* snaken, snaken_snake_speed_t speed) {
     snaken->snake_speed = speed;
 

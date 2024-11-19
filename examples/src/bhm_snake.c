@@ -49,7 +49,7 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
       return BHM_ERROR_EXTERNAL_CAUSES;
    }
 
-   snaken_error = snaken2d_set_snake_stamina(snaken, 0xF0);
+   snaken_error = snaken2d_set_snake_stamina(snaken, 0xFF);
    if (snaken_error != SNAKEN_ERROR_NONE) {
       printf("There was an error updating the snake stamina: %d\n", snaken_error);
       return BHM_ERROR_EXTERNAL_CAUSES;
@@ -129,6 +129,11 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
    // Run evaluation.
    // ##########################################
    for (bhm_ticks_count_t i = 0; i < 10000; i++) {
+      // Make sure the snake is still alive before going on.
+      if (!snaken->snake_alive) break;
+
+      // printf("Snake length: %d\n", snaken->snake_length);
+
       bhm_cortex2d_t* prev_cortex = i % 2 ? tmp_cortex : cortex;
       bhm_cortex2d_t* next_cortex = i % 2 ? cortex : tmp_cortex;
 
@@ -151,8 +156,7 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
       // Tick the cortex.
       c2d_tick(prev_cortex, next_cortex);
 
-      // Make sure the snake is still alive before going on.
-      if (!snaken->snake_alive) break;
+      // Tick the snaken.
       snaken_error = snaken2d_tick(snaken);
       if (snaken_error != SNAKEN_ERROR_NONE) {
          printf("There was an error running the snaken: %d\n", snaken_error);
@@ -165,8 +169,16 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
       o2d_mean(left_output, &mean_left_output);
       o2d_mean(left_output, &mean_right_output);
 
+      // printf("%d|%d\n", mean_left_output, mean_right_output);
+
       // Use cortex output to control the snake.
-      // TODO
+      if (mean_left_output > mean_right_output) {
+         printf("turning left\n");
+         snaken2d_turn_left(snaken);
+      } else if (mean_right_output > mean_left_output) {
+         printf("turning right\n");
+         snaken2d_turn_right(snaken);
+      }
    }
    // ##########################################
    // ##########################################
@@ -195,7 +207,7 @@ int main(void) {
       printf("There was an error initializing the population: %d\n", bhm_error);
       return 1;
    }
-   bhm_error = p2d_populate(cortices_pop, 256, 192, 2);
+   bhm_error = p2d_populate(cortices_pop, 64, 48, 2);
    if (bhm_error != BHM_ERROR_NONE) {
       printf("There was an error population the cortices: %d\n", bhm_error);
       return 1;

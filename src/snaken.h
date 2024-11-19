@@ -169,6 +169,16 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t direction);
 
+/// @brief Turns the snake left relative to its current direction.
+/// @param snaken The snaken to apply the turn to.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+snaken_error_code_t snaken2d_turn_left(snaken2d_t* snaken);
+
+/// @brief Turns the snake right relative to its current direction.
+/// @param snaken The snaken to apply the turn to.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+snaken_error_code_t snaken2d_turn_right(snaken2d_t* snaken);
+
 /// @brief Sets the snake speed in the provided snaken.
 /// @param snaken The snaken to apply the new speed to.
 /// @param speed The new speed to apply.
