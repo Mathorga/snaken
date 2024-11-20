@@ -2,6 +2,15 @@
 #include <snaken/snaken.h>
 #include <behema/behema.h>
 
+/// @brief Maps the provided snake view to an array of pulses.
+/// @param snake_view The snake view to map.
+/// @param sample_window The window the view needs to be mapped to.
+/// @return The mapped snake view.
+bhm_ticks_count_t snake_view_to_pulse(snaken_cell_type_t snake_view, bhm_ticks_count_t sample_window) {
+   // 4 is the max possible snaken_cell_type_t value.
+   return sample_window / 4 * snake_view;
+}
+
 /// @brief Evaluates the provided cortex.
 /// @param cortex The cortex to evaluate.
 /// @param fitness The cortex fitness score as a result of the evaluation process.
@@ -49,7 +58,7 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
       return BHM_ERROR_EXTERNAL_CAUSES;
    }
 
-   snaken_error = snaken2d_set_snake_stamina(snaken, 0xFF);
+   snaken_error = snaken2d_set_snake_stamina(snaken, SNAKEN_SNAKE_STAMINA_UNLIMITED);
    if (snaken_error != SNAKEN_ERROR_NONE) {
       printf("There was an error updating the snake stamina: %d\n", snaken_error);
       return BHM_ERROR_EXTERNAL_CAUSES;
@@ -67,7 +76,8 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
    // ##########################################
    // Input init.
    // ##########################################
-   snaken_world_size_t snaken_view_width = (snaken->snake_view_radius * 2) + 1;
+   bhm_ticks_count_t mean_input = 0;
+   snaken_world_size_t snaken_view_width = NH_DIAM_2D(snaken->snake_view_radius);
    bhm_cortex_size_t input_width = snaken_view_width * snaken_view_width;
    bhm_input2d_t* input;
    bhm_error = i2d_init(
@@ -130,9 +140,9 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
    // ##########################################
    for (bhm_ticks_count_t i = 0; i < 10000; i++) {
       // Make sure the snake is still alive before going on.
-      if (!snaken->snake_alive) break;
-
-      // printf("Snake length: %d\n", snaken->snake_length);
+      if (!snaken->snake_alive) {
+         break;
+      }
 
       bhm_cortex2d_t* prev_cortex = i % 2 ? tmp_cortex : cortex;
       bhm_cortex2d_t* next_cortex = i % 2 ? cortex : tmp_cortex;
@@ -144,13 +154,30 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
          printf("There was an error retrieving the snake view: %d\n", snaken_error);
          return BHM_ERROR_EXTERNAL_CAUSES;
       }
+      for (snaken_world_size_t y = 0; y < snaken_view_width; y++) {
+         for (snaken_world_size_t x = 0; x < snaken_view_width; x++) {
+               printf("%d - ", view[IDX2D(x, y, snaken_view_width)]);
+         }
+         printf("\n");
+      }
+      printf("\n");
 
       // Feed input to the cortex.
       for (bhm_cortex_size_t y = 0; y < input->y1 - input->y0; y++) {
          for (bhm_cortex_size_t x = 0; x < input->x1 - input->x0; x++) {
-            input->values[IDX2D(x, y, input->x1 - input->x0)] = view[IDX2D(x, y, input->x1 - input->x0)];
+            input->values[IDX2D(x, y, input->x1 - input->x0)] = snake_view_to_pulse(view[IDX2D(x, y, input->x1 - input->x0)], prev_cortex->sample_window);
          }
       }
+      i2d_mean(input, &mean_input);
+      // if (mean_input > 0) {
+      //    printf("Input mean value: %d\n", mean_input);
+      //    for (bhm_cortex_size_t y = 0; y < input->y1 - input->y0; y++) {
+      //       for (bhm_cortex_size_t x = 0; x < input->x1 - input->x0; x++) {
+      //          printf("%d - ", input->values[IDX2D(x, y, input->x1 - input->x0)]);
+      //       }
+      //    }
+      //    printf("\n");
+      // }
       c2d_feed2d(prev_cortex, input);
 
       // Tick the cortex.

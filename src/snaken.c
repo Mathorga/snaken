@@ -22,7 +22,7 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
     }
 
     // Allocate apples.
-    (*snaken)->apples_length = DEFAULT_APPLES_LENGTH;
+    (*snaken)->apples_length = SNAKEN_DEFAULT_APPLES_LENGTH;
     (*snaken)->apples = (snaken_world_size_t*) malloc((*snaken)->apples_length * sizeof(snaken_world_size_t));
     if ((*snaken)->apples == NULL) {
         return SNAKEN_ERROR_FAILED_ALLOC;
@@ -34,7 +34,7 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
     }
 
     // Allocate snake body.
-    (*snaken)->snake_length = STARTING_SNAKE_LENGTH;
+    (*snaken)->snake_length = SNAKEN_STARTING_SNAKE_LENGTH;
     (*snaken)->snake_body = (snaken_world_size_t*) malloc((*snaken)->snake_length * sizeof(snaken_world_size_t));
     if ((*snaken)->snake_body == NULL) {
         return SNAKEN_ERROR_FAILED_ALLOC;
@@ -48,14 +48,14 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
         (*snaken)->snake_body[i] = (*snaken)->snake_body[0];
     }
 
-    (*snaken)->snake_speed = DEFAULT_SNAKE_SPEED;
+    (*snaken)->snake_speed = SNAKEN_DEFAULT_SNAKE_SPEED;
     (*snaken)->snake_speed_step = 0;
-    (*snaken)->snake_stamina = DEFAULT_SNAKE_STAMINA;
+    (*snaken)->snake_stamina = SNAKEN_DEFAULT_SNAKE_STAMINA;
     (*snaken)->snake_stamina_step = 0;
-    (*snaken)->snake_direction = STARTING_SNAKE_DIR;
+    (*snaken)->snake_direction = SNAKEN_STARTING_SNAKE_DIR;
     (*snaken)->self_intersection = SNAKEN_FALSE;
     (*snaken)->snake_alive = SNAKEN_TRUE;
-    (*snaken)->snake_view_radius = DEFAULT_SNAKE_VIEW_RADIUS;
+    (*snaken)->snake_view_radius = SNAKEN_DEFAULT_SNAKE_VIEW_RADIUS;
 
     return SNAKEN_ERROR_NONE;
 }
@@ -137,10 +137,10 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
     // Populate the resulting snake view.
     for (snaken_world_size_t j = 0; j < snake_view_diameter; j++) {
         // Compute world-space j.
-        snaken_world_size_t global_j = snaken->snake_body[0] - j - snaken->snake_view_radius;
+        snaken_world_size_t global_j = (snaken->snake_body[0] / snaken->world_width) - j - snaken->snake_view_radius;
         for (snaken_world_size_t i = 0; i < snake_view_diameter; i++) {
             // Compute world-space i.
-            snaken_world_size_t global_i = snaken->snake_body[0] - i - snaken->snake_view_radius;
+            snaken_world_size_t global_i = (snaken->snake_body[0] % snaken->world_width) - i - snaken->snake_view_radius;
 
             snaken_world_size_t local_location = IDX2D(i, j, snake_view_diameter);
             snaken_world_size_t global_location = IDX2D(global_i, global_j, snaken->world_width);
@@ -449,9 +449,7 @@ snaken_error_code_t snaken2d_eat_body(snaken2d_t* snaken, snaken_bool_t* result)
     (*result) = SNAKEN_FALSE;
 
     // Make sure no check is performed if so specified.
-    if (!snaken->self_intersection) {
-        return SNAKEN_ERROR_NONE;
-    }
+    if (!snaken->self_intersection) return SNAKEN_ERROR_NONE;
 
     // Start from 1 since the first element is actually the snake head.
     for (snaken_world_size_t i = 1; i < snaken->snake_length; i++) {
