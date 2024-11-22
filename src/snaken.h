@@ -84,13 +84,21 @@ typedef enum {
 #define SNAKEN_STARTING_SNAKE_DIR SNAKEN_UP
 
 typedef struct {
-    // ################ World properties ################
+    // ################
+    // World properties.
+    // ################
 
     // World size.
     snaken_world_size_t world_width;
     snaken_world_size_t world_height;
 
-    // ################ Walls locations ################
+    // ################
+    // ################
+
+
+    // ################
+    // Walls locations.
+    // ################
 
     // Length of walls array.
     snaken_world_size_t walls_length;
@@ -98,7 +106,13 @@ typedef struct {
     // Walls array.
     snaken_world_size_t* walls;
 
-    // ################ Apple locations ################
+    // ################
+    // ################
+
+
+    // ################
+    // Apple locations.
+    // ################
 
     // Apples array length.
     snaken_world_size_t apples_length;
@@ -106,7 +120,13 @@ typedef struct {
     // Apples array.
     snaken_world_size_t* apples;
 
-    // ################ Snake locations ################
+    // ################
+    // ################
+
+
+    // ################
+    // Snake locations.
+    // ################
 
     // Snake length.
     snaken_world_size_t snake_length;
@@ -114,7 +134,13 @@ typedef struct {
     // Snake body.
     snaken_world_size_t* snake_body;
 
-    // ################ Snake properties ################
+    // ################
+    // ################
+
+
+    // ################
+    // Snake properties.
+    // ################
 
     // Snake speed. Goes from 0x00 to 0xFF, where 0x00 means the snake does not move and 0xFF means the snake moves once every time step.
     snaken_snake_speed_t snake_speed;
@@ -139,10 +165,15 @@ typedef struct {
 
     // Snake view radius.
     snaken_world_size_t snake_view_radius;
+
+    // ################
+    // ################
 } snaken2d_t;
 
 
-// ########################################## Initialization functions ##########################################
+// ##########################################
+// Initialization functions.
+// ##########################################
 
 /// @brief Initializes the given snaken with default values.
 /// @param snaken The snaken to initialize.
@@ -151,16 +182,26 @@ typedef struct {
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world_width, snaken_world_size_t world_height);
 
+// ##########################################
+// ##########################################
 
-// ########################################## Execution functions ##########################################
+
+// ##########################################
+// Execution functions.
+// ##########################################
 
 /// @brief Performs a single run cycle in the provided snaken.
 /// @param snaken The snaken to run the loop in.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_tick(snaken2d_t* snaken);
 
+// ##########################################
+// ##########################################
 
-// ########################################## Getter functions ##########################################
+
+// ##########################################
+// Getter functions.
+// ##########################################
 
 /// @brief Retrieves the current snake view and stores it in [view].
 /// @param view The view to populate from the given snaken.
@@ -168,8 +209,13 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken);
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type_t* view);
 
+// ##########################################
+// ##########################################
 
-// ########################################## Setter functions ##########################################
+
+// ##########################################
+// Setter functions.
+// ##########################################
 
 /// @brief Sets the snake facing direction.
 /// @param snaken The snaken to apply the snake direction to.
@@ -228,8 +274,13 @@ snaken_error_code_t snaken2d_set_walls(snaken2d_t* snaken, snaken_world_size_t w
 /// @warning The provided walls will not overwrite any existing walls. Use [snaken2d_set_walls] to overwrite them instead.
 snaken_error_code_t snaken2d_add_walls(snaken2d_t* snaken, snaken_world_size_t walls_length, snaken_world_size_t* walls);
 
+// ##########################################
+// ##########################################
 
-// ########################################## Util functions ##########################################
+
+// ##########################################
+// Util functions.
+// ##########################################
 
 /// @brief Moves the snake along its facing direction.
 /// @param snaken The snaken to compute the movement on.
@@ -242,6 +293,9 @@ snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result
 snaken_error_code_t snaken2d_hit_wall(snaken2d_t* snaken, snaken_bool_t* result);
 
 snaken_error_code_t snaken2d_eat_body(snaken2d_t* snaken, snaken_bool_t* result);
+
+// ##########################################
+// ##########################################
 
 
 #ifdef __cplusplus

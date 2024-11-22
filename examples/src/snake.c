@@ -6,10 +6,28 @@ double lerp(double a, double b, double t) {
     return a + t * (b - a);
 }
 
+char cell_type_to_char(snaken_cell_type_t cell_type) {
+    switch (cell_type) {
+        case SNAKEN_SNAKE_HEAD:
+            return 'O';
+        case SNAKEN_SNAKE_BODY:
+            return 'o';
+        case SNAKEN_APPLE:
+            return '@';
+        case SNAKEN_WALL:
+            return 'H';
+        case SNAKEN_EMPTY:
+        default:
+            return '+';
+    }
+}
+
 void print_snake_view(snaken_cell_type_t* view, snaken_world_size_t view_diameter) {
-    for (snaken_world_size_t y = 0; y < view_diameter; y++) {
-        for (snaken_world_size_t x = 0; x < view_diameter; x++) {
-            printf("%d - ", view[IDX2D(x, y, view_diameter)]);
+    for (snaken_world_size_t y = view_diameter - 1; y >= 0; y--) {
+    // for (snaken_world_size_t y = 0; y < view_diameter; y++) {
+        for (snaken_world_size_t x = view_diameter - 1; x >= 0; x--) {
+        // for (snaken_world_size_t x = 0; x < view_diameter; x++) {
+            printf("%c ", cell_type_to_char(view[IDX2D(x, y, view_diameter)]));
         }
         printf("\n");
     }

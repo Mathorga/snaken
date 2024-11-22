@@ -6,16 +6,54 @@
 /// @param snake_view The snake view to map.
 /// @param sample_window The window the view needs to be mapped to.
 /// @return The mapped snake view.
-bhm_ticks_count_t snake_view_to_pulse(snaken_cell_type_t snake_view, bhm_ticks_count_t sample_window) {
+bhm_ticks_count_t snake_view_to_pulse(
+   snaken_cell_type_t snake_view,
+   bhm_ticks_count_t sample_window
+) {
+   int damping = 10;
    // 4 is the max possible snaken_cell_type_t value.
-   return sample_window / 4 * snake_view;
+   return sample_window / (4 + damping) * (snake_view + damping);
+}
+
+char cell_type_to_char(snaken_cell_type_t cell_type) {
+    switch (cell_type) {
+        case SNAKEN_SNAKE_HEAD:
+            return 'O';
+        case SNAKEN_SNAKE_BODY:
+            return 'o';
+        case SNAKEN_APPLE:
+            return '@';
+        case SNAKEN_WALL:
+            return 'H';
+        case SNAKEN_EMPTY:
+        default:
+            return '+';
+    }
+}
+
+void print_snake_view(
+   snaken_cell_type_t* view,
+   snaken_world_size_t view_diameter
+) {
+    for (snaken_world_size_t y = view_diameter - 1; y >= 0; y--) {
+    // for (snaken_world_size_t y = 0; y < view_diameter; y++) {
+        for (snaken_world_size_t x = view_diameter - 1; x >= 0; x--) {
+        // for (snaken_world_size_t x = 0; x < view_diameter; x++) {
+            printf("%c ", cell_type_to_char(view[IDX2D(x, y, view_diameter)]));
+        }
+        printf("\n");
+    }
+    printf("\n");
 }
 
 /// @brief Evaluates the provided cortex.
 /// @param cortex The cortex to evaluate.
 /// @param fitness The cortex fitness score as a result of the evaluation process.
 /// @return The code for the occurred error, [BHM_ERROR_NONE] if none.
-bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitness) {
+bhm_error_code_t eval_cortex(
+   bhm_cortex2d_t* cortex,
+   bhm_cortex_fitness_t* fitness
+) {
    const int world_width = 30;
    const int world_height = 30;
 
@@ -86,7 +124,7 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
       0,
       (cortex->width / 2) + (input_width / 2),
       1,
-      BHM_DEFAULT_EXC_VALUE * 2,
+      BHM_DEFAULT_EXC_VALUE * 1000,
       BHM_PULSE_MAPPING_FPROP
    );
    if (bhm_error != BHM_ERROR_NONE) {
@@ -138,7 +176,7 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
    // ##########################################
    // Run evaluation.
    // ##########################################
-   for (bhm_ticks_count_t i = 0; i < 10000; i++) {
+   for (bhm_ticks_count_t i = 0; i < 50000; i++) {
       // Make sure the snake is still alive before going on.
       if (!snaken->snake_alive) {
          break;
@@ -154,13 +192,7 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
          printf("There was an error retrieving the snake view: %d\n", snaken_error);
          return BHM_ERROR_EXTERNAL_CAUSES;
       }
-      for (snaken_world_size_t y = 0; y < snaken_view_width; y++) {
-         for (snaken_world_size_t x = 0; x < snaken_view_width; x++) {
-               printf("%d - ", view[IDX2D(x, y, snaken_view_width)]);
-         }
-         printf("\n");
-      }
-      printf("\n");
+      // print_snake_view(view, snaken_view_width);
 
       // Feed input to the cortex.
       for (bhm_cortex_size_t y = 0; y < input->y1 - input->y0; y++) {
@@ -173,12 +205,14 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
       //    printf("Input mean value: %d\n", mean_input);
       //    for (bhm_cortex_size_t y = 0; y < input->y1 - input->y0; y++) {
       //       for (bhm_cortex_size_t x = 0; x < input->x1 - input->x0; x++) {
-      //          printf("%d - ", input->values[IDX2D(x, y, input->x1 - input->x0)]);
+      //          printf("%d ", input->values[IDX2D(x, y, input->x1 - input->x0)]);
       //       }
+      //       printf("\n");
       //    }
       //    printf("\n");
       // }
       c2d_feed2d(prev_cortex, input);
+      c2d_to_file(cortex, (char*) "out/test.c2d");
 
       // Tick the cortex.
       c2d_tick(prev_cortex, next_cortex);
@@ -211,6 +245,7 @@ bhm_error_code_t eval_cortex(bhm_cortex2d_t* cortex, bhm_cortex_fitness_t* fitne
    // ##########################################
 
    *fitness = snaken->snake_length;
+   c2d_to_file(cortex, (char*) "out/test.c2d");
    printf("Evaluated the cortex: %d\n", *fitness);
 
    return BHM_ERROR_NONE;

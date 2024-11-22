@@ -137,10 +137,14 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
     // Populate the resulting snake view.
     for (snaken_world_size_t j = 0; j < snake_view_diameter; j++) {
         // Compute world-space j.
-        snaken_world_size_t global_j = (snaken->snake_body[0] / snaken->world_width) - j - snaken->snake_view_radius;
+        // snaken_world_size_t global_j = (snaken->snake_body[0] / snaken->world_width) - j - snaken->snake_view_radius;
+        snaken_world_size_t global_j = ((snaken->snake_body[0] / snaken->world_width) - j + snaken->snake_view_radius) % snaken->world_height;
+        // snaken_world_size_t global_j = (snaken->snake_body[0] / snaken->world_width) - (snake_view_diameter - j);
         for (snaken_world_size_t i = 0; i < snake_view_diameter; i++) {
             // Compute world-space i.
-            snaken_world_size_t global_i = (snaken->snake_body[0] % snaken->world_width) - i - snaken->snake_view_radius;
+            // snaken_world_size_t global_i = (snaken->snake_body[0] % snaken->world_width) - i - snaken->snake_view_radius;
+            snaken_world_size_t global_i = ((snaken->snake_body[0] % snaken->world_width) - i + snaken->snake_view_radius) % snaken->world_width;
+            // snaken_world_size_t global_i = (snaken->snake_body[0] % snaken->world_width) - (snake_view_diameter - i);
 
             snaken_world_size_t local_location = IDX2D(i, j, snake_view_diameter);
             snaken_world_size_t global_location = IDX2D(global_i, global_j, snaken->world_width);
