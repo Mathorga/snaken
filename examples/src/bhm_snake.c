@@ -46,6 +46,15 @@ void print_snake_view(
     printf("\n");
 }
 
+bhm_error_code_t dummy_eval(
+   bhm_cortex2d_t* cortex,
+   bhm_cortex_fitness_t* fitness
+) {
+   (*fitness) = rand() % 10;
+   printf("Evaluated cortex: %d\n", *fitness);
+   return BHM_ERROR_NONE;
+}
+
 /// @brief Evaluates the provided cortex.
 /// @param cortex The cortex to evaluate.
 /// @param fitness The cortex fitness score as a result of the evaluation process.
@@ -176,7 +185,7 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    // Run evaluation.
    // ##########################################
-   for (bhm_ticks_count_t i = 0; i < 50000; i++) {
+   for (bhm_ticks_count_t i = 0; i < 10000; i++) {
       // Make sure the snake is still alive before going on.
       if (!snaken->snake_alive) {
          break;
@@ -251,8 +260,9 @@ bhm_error_code_t eval_cortex(
    return BHM_ERROR_NONE;
 }
 
-
 int main(void) {
+   srand(time(NULL));
+
    // ##########################################
    // Init cortices population.
    // ##########################################
@@ -260,10 +270,11 @@ int main(void) {
    bhm_population2d_t* cortices_pop;
    bhm_error = p2d_init(
       &cortices_pop,
-      200,
-      20,
+      10,
+      5,
       0x0000FF,
-      &eval_cortex
+      // &eval_cortex
+      &dummy_eval
    );
    if (bhm_error != BHM_ERROR_NONE) {
       printf("There was an error initializing the population: %d\n", bhm_error);
@@ -293,6 +304,9 @@ int main(void) {
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error selecting survivors: %d\n", bhm_error);
          return 1;
+      }
+      for (bhm_population_size_t i = 0; i < cortices_pop->selection_pool_size; i++) {
+         printf("SELECTION_POOL %d\n", cortices_pop->selection_pool[i]);
       }
       printf("Crossover %d\n", i);
       bhm_error = p2d_crossover(cortices_pop, BHM_TRUE);
