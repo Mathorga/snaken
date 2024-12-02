@@ -46,15 +46,6 @@ void print_snake_view(
     printf("\n");
 }
 
-bhm_error_code_t dummy_eval(
-   bhm_cortex2d_t* cortex,
-   bhm_cortex_fitness_t* fitness
-) {
-   (*fitness) = rand() % 10;
-   printf("Evaluated cortex: %d\n", *fitness);
-   return BHM_ERROR_NONE;
-}
-
 /// @brief Evaluates the provided cortex.
 /// @param cortex The cortex to evaluate.
 /// @param fitness The cortex fitness score as a result of the evaluation process.
@@ -73,7 +64,7 @@ bhm_error_code_t eval_cortex(
    bhm_error_code_t bhm_error;
 
    bhm_cortex2d_t* tmp_cortex;
-   bhm_error = c2d_init(&tmp_cortex, cortex->width, cortex->height, cortex->nh_radius);
+   bhm_error = c2d_create(&tmp_cortex, cortex->width, cortex->height, cortex->nh_radius);
    if (bhm_error != BHM_ERROR_NONE) {
       printf("There was an error allocating input %d\n", bhm_error);
       return bhm_error;
@@ -210,16 +201,6 @@ bhm_error_code_t eval_cortex(
          }
       }
       i2d_mean(input, &mean_input);
-      // if (mean_input > 0) {
-      //    printf("Input mean value: %d\n", mean_input);
-      //    for (bhm_cortex_size_t y = 0; y < input->y1 - input->y0; y++) {
-      //       for (bhm_cortex_size_t x = 0; x < input->x1 - input->x0; x++) {
-      //          printf("%d ", input->values[IDX2D(x, y, input->x1 - input->x0)]);
-      //       }
-      //       printf("\n");
-      //    }
-      //    printf("\n");
-      // }
       c2d_feed2d(prev_cortex, input);
       c2d_to_file(cortex, (char*) "out/test.c2d");
 
@@ -273,8 +254,8 @@ int main(void) {
       10,
       5,
       0x0000FF,
-      // &eval_cortex
-      &dummy_eval
+      &eval_cortex
+      // &dummy_evals
    );
    if (bhm_error != BHM_ERROR_NONE) {
       printf("There was an error initializing the population: %d\n", bhm_error);
@@ -292,7 +273,7 @@ int main(void) {
    // ##########################################
    // Evolve the population.
    // ##########################################
-   for (uint16_t i = 0; i < 1000; i++) {
+   for (uint16_t i = 0; i < 100000; i++) {
       printf("Evaluation %d\n", i);
       bhm_error = p2d_evaluate(cortices_pop);
       if (bhm_error != BHM_ERROR_NONE) {
@@ -322,7 +303,7 @@ int main(void) {
    // ##########################################
    // Cleanup.
    // ##########################################
-   // p2d_destroy(cortices_pop);
+   p2d_destroy(cortices_pop);
    // ##########################################
    // ##########################################
 
