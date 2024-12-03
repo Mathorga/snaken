@@ -102,7 +102,7 @@ bhm_error_code_t eval_cortex(
       return BHM_ERROR_EXTERNAL_CAUSES;
    }
 
-   snaken_error = snaken2d_set_apples_count(snaken, 0x0F);
+   snaken_error = snaken2d_set_apples_count(snaken, 0xAF);
    if (snaken_error != SNAKEN_ERROR_NONE) {
       printf("There was an error setting the amount of apples: %d\n", snaken_error);
       return BHM_ERROR_EXTERNAL_CAUSES;
@@ -124,7 +124,7 @@ bhm_error_code_t eval_cortex(
       0,
       (cortex->width / 2) + (input_width / 2),
       1,
-      BHM_DEFAULT_EXC_VALUE * 1000,
+      1000,
       BHM_PULSE_MAPPING_FPROP
    );
    if (bhm_error != BHM_ERROR_NONE) {
@@ -201,8 +201,9 @@ bhm_error_code_t eval_cortex(
          }
       }
       i2d_mean(input, &mean_input);
+      // printf("mean_input %d\n", mean_input);
       c2d_feed2d(prev_cortex, input);
-      c2d_to_file(cortex, (char*) "out/test.c2d");
+      // c2d_to_file(cortex, (char*) "out/test.c2d");
 
       // Tick the cortex.
       c2d_tick(prev_cortex, next_cortex);
@@ -220,7 +221,8 @@ bhm_error_code_t eval_cortex(
       o2d_mean(left_output, &mean_left_output);
       o2d_mean(left_output, &mean_right_output);
 
-      // printf("%d|%d\n", mean_left_output, mean_right_output);
+      // if (mean_left_output > 0 || mean_right_output > 0)
+      //    printf("%d|%d\n", mean_left_output, mean_right_output);
 
       // Use cortex output to control the snake.
       if (mean_left_output > mean_right_output) {
@@ -235,7 +237,9 @@ bhm_error_code_t eval_cortex(
    // ##########################################
 
    *fitness = snaken->snake_length;
-   c2d_to_file(cortex, (char*) "out/test.c2d");
+   char fileName[100];
+   snprintf(fileName, 100, "out/%lu_%d.c2d", (unsigned long) time(NULL), *fitness);
+   c2d_to_file(cortex, fileName);
    printf("Evaluated the cortex: %d\n", *fitness);
 
    return BHM_ERROR_NONE;
