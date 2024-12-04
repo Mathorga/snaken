@@ -237,10 +237,6 @@ bhm_error_code_t eval_cortex(
    // ##########################################
 
    *fitness = snaken->snake_length;
-   char fileName[100];
-   snprintf(fileName, 100, "out/%lu_%d.c2d", (unsigned long) time(NULL), *fitness);
-   c2d_to_file(cortex, fileName);
-   printf("Evaluated the cortex: %d\n", *fitness);
 
    return BHM_ERROR_NONE;
 }
@@ -299,6 +295,11 @@ int main(void) {
          printf("There was an error crossing survivors over: %d\n", bhm_error);
          return 1;
       }
+
+      // Save the best cortex to file.
+      char fileName[100];
+      snprintf(fileName, 100, "out/bog_%d.c2d", i);
+      c2d_to_file(&(cortices_pop->cortices[cortices_pop->selection_pool[0]]), fileName);
    }
    // ##########################################
    // ##########################################
