@@ -238,7 +238,7 @@ bhm_error_code_t eval_cortex(
 
    *fitness = snaken->snake_length;
 
-   printf("fitness: %d\n", *fitness);
+   // printf("fitness: %d\n", *fitness);
 
    return BHM_ERROR_NONE;
 }
@@ -298,7 +298,9 @@ int main(void) {
       c2d_to_file(&(cortices_pop->cortices[cortices_pop->selection_pool[0]]), fileName);
 
       printf("Crossover %d\n", i);
-      bhm_error = p2d_crossover(cortices_pop, BHM_TRUE);
+      // bhm_error = p2d_crossover(cortices_pop, BHM_TRUE);
+      bhm_error = p2d_crossover(cortices_pop, BHM_FALSE);
+      // bhm_error = p2d_mutate(cortices_pop);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error crossing survivors over: %d\n", bhm_error);
          return 1;
