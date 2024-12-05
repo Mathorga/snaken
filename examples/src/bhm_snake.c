@@ -12,7 +12,7 @@ bhm_ticks_count_t snake_view_to_pulse(
 ) {
    int damping = 10;
    // 4 is the max possible snaken_cell_type_t value.
-   return sample_window / (4 + damping) * (snake_view + damping);
+   return (sample_window / (4 + damping)) * (snake_view + damping);
 }
 
 char cell_type_to_char(snaken_cell_type_t cell_type) {
@@ -219,17 +219,17 @@ bhm_error_code_t eval_cortex(
       c2d_read2d(next_cortex, left_output);
       c2d_read2d(next_cortex, right_output);
       o2d_mean(left_output, &mean_left_output);
-      o2d_mean(left_output, &mean_right_output);
+      o2d_mean(right_output, &mean_right_output);
 
       // if (mean_left_output > 0 || mean_right_output > 0)
       //    printf("%d|%d\n", mean_left_output, mean_right_output);
 
       // Use cortex output to control the snake.
       if (mean_left_output > mean_right_output) {
-         printf("turning left\n");
+         // printf("turning left\n");
          snaken2d_turn_left(snaken);
       } else if (mean_right_output > mean_left_output) {
-         printf("turning right\n");
+         // printf("turning right\n");
          snaken2d_turn_right(snaken);
       }
    }
@@ -237,6 +237,8 @@ bhm_error_code_t eval_cortex(
    // ##########################################
 
    *fitness = snaken->snake_length;
+
+   printf("fitness: %d\n", *fitness);
 
    return BHM_ERROR_NONE;
 }
@@ -253,7 +255,7 @@ int main(void) {
       &cortices_pop,
       10,
       5,
-      0x0000FF,
+      0x00000F,
       &eval_cortex
       // &dummy_evals
    );
