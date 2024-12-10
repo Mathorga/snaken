@@ -1,9 +1,15 @@
 #include "snaken.h"
 
 
-// ########################################## Initialization functions ##########################################
+// ##########################################
+// Initialization functions.
+// ##########################################
 
-snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world_width, snaken_world_size_t world_height) {
+snaken_error_code_t snaken2d_init(
+    snaken2d_t** snaken,
+    snaken_world_size_t world_width,
+    snaken_world_size_t world_height
+) {
     // Allocate the snaken.
     (*snaken) = (snaken2d_t*) malloc(sizeof(snaken2d_t));
     if ((*snaken) == NULL) {
@@ -59,9 +65,13 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 
     return SNAKEN_ERROR_NONE;
 }
+// ##########################################
+// ##########################################
 
 
-// ########################################## Execution functions ##########################################
+// ##########################################
+// Execution functions.
+// ##########################################
 
 snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
     snaken_error_code_t error = SNAKEN_ERROR_NONE;
@@ -128,8 +138,12 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
     return SNAKEN_ERROR_NONE;
 }
 
+// ##########################################
+// ##########################################
 
-// ########################################## Getter functions ##########################################
+// ##########################################
+// Getter functions.
+// ##########################################
 
 snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type_t* view) {
     snaken_world_size_t snake_view_diameter = NH_DIAM_2D(snaken->snake_view_radius);
@@ -201,11 +215,38 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
     return SNAKEN_ERROR_NONE;
 }
 
+// ##########################################
+// ##########################################
 
-// ########################################## Setter functions ##########################################
+
+// ##########################################
+// Setter functions.
+// ##########################################
 
 snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t direction) {
     snaken->snake_direction = direction;
+
+    return SNAKEN_ERROR_NONE;
+}
+
+snaken_error_code_t snaken2d_set_snake_view_radius(
+    snaken2d_t* snaken,
+    snaken_world_size_t radius
+) {
+    snaken->snake_view_radius = radius;
+
+    return SNAKEN_ERROR_NONE;
+}
+
+snaken_error_code_t snaken2d_set_snake_length(
+    snaken2d_t* snaken,
+    snaken_world_size_t length
+) {
+    snaken->snake_length = length;
+    snaken->snake_body = (snaken_world_size_t*) realloc(snaken->snake_body, snaken->snake_length * sizeof(snaken_world_size_t));
+    if (snaken->snake_body == NULL) {
+        return SNAKEN_ERROR_FAILED_ALLOC;
+    }
 
     return SNAKEN_ERROR_NONE;
 }
@@ -348,8 +389,13 @@ snaken_error_code_t snaken2d_add_walls(snaken2d_t* snaken, snaken_world_size_t w
     return SNAKEN_ERROR_NONE;
 }
 
+// ##########################################
+// ##########################################
 
-// ########################################## Util functions ##########################################
+
+// ##########################################
+// Util functions.
+// ##########################################
 
 snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken) {
     snaken->snake_speed_step++;
@@ -471,3 +517,6 @@ snaken_error_code_t snaken2d_eat_body(snaken2d_t* snaken, snaken_bool_t* result)
 
     return SNAKEN_ERROR_NONE;
 }
+
+// ##########################################
+// ##########################################

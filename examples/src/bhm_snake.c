@@ -1,6 +1,13 @@
 #include <stdio.h>
 #include <snaken/snaken.h>
+#include <snaken/graphics.h>
 #include <behema/behema.h>
+
+snaken_bool_t DRAW = SNAKEN_FALSE;
+
+double lerp(double a, double b, double t) {
+    return a + t * (b - a);
+}
 
 /// @brief Maps the provided snake view to an array of pulses.
 /// @param snake_view The snake view to map.
@@ -57,6 +64,9 @@ bhm_error_code_t eval_cortex(
    const int world_width = 30;
    const int world_height = 30;
 
+   int screen_width = world_width * 20;
+   int screen_height = world_height * 20;
+
 
    // ##########################################
    // Init cortices.
@@ -90,13 +100,25 @@ bhm_error_code_t eval_cortex(
       return BHM_ERROR_EXTERNAL_CAUSES;
    }
 
+   snaken_error = snaken2d_set_snake_length(snaken, 0xFFu);
+   if (snaken_error != SNAKEN_ERROR_NONE) {
+      printf("There was an error updating the snake length: %d\n", snaken_error);
+      return BHM_ERROR_EXTERNAL_CAUSES;
+   }
+
+   snaken_error = snaken2d_set_snake_view_radius(snaken, 0x03u);
+   if (snaken_error != SNAKEN_ERROR_NONE) {
+      printf("There was an error updating the snake view radius: %d\n", snaken_error);
+      return BHM_ERROR_EXTERNAL_CAUSES;
+   }
+
    snaken_error = snaken2d_set_snake_speed(snaken, 0xF5);
    if (snaken_error != SNAKEN_ERROR_NONE) {
       printf("There was an error updating the snake speed: %d\n", snaken_error);
       return BHM_ERROR_EXTERNAL_CAUSES;
    }
 
-   snaken_error = snaken2d_set_snake_stamina(snaken, SNAKEN_SNAKE_STAMINA_UNLIMITED);
+   snaken_error = snaken2d_set_snake_stamina(snaken, SNAKEN_SNAKE_STAMINA_MID);
    if (snaken_error != SNAKEN_ERROR_NONE) {
       printf("There was an error updating the snake stamina: %d\n", snaken_error);
       return BHM_ERROR_EXTERNAL_CAUSES;
@@ -172,18 +194,24 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    // ##########################################
 
+   if (DRAW)
+      snaken_graphics_begin(
+         screen_width,
+         screen_height
+      );
 
    // ##########################################
    // Run evaluation.
    // ##########################################
-   for (bhm_ticks_count_t i = 0; i < 10000; i++) {
+   bhm_ticks_count_t timestep = 0;
+   for (; timestep < 100000; timestep++) {
       // Make sure the snake is still alive before going on.
       if (!snaken->snake_alive) {
          break;
       }
 
-      bhm_cortex2d_t* prev_cortex = i % 2 ? tmp_cortex : cortex;
-      bhm_cortex2d_t* next_cortex = i % 2 ? cortex : tmp_cortex;
+      bhm_cortex2d_t* prev_cortex = timestep % 2 ? tmp_cortex : cortex;
+      bhm_cortex2d_t* next_cortex = timestep % 2 ? cortex : tmp_cortex;
 
       // Get snake view as input.
       snaken_cell_type_t* view = (snaken_cell_type_t*) malloc(snaken_view_width * snaken_view_width * sizeof(snaken_cell_type_t));
@@ -232,13 +260,17 @@ bhm_error_code_t eval_cortex(
          // printf("turning right\n");
          snaken2d_turn_right(snaken);
       }
+
+      if (DRAW) snaken_graphics_draw(snaken);
    }
    // ##########################################
    // ##########################################
 
-   *fitness = snaken->snake_length;
+   *fitness = snaken->snake_length + timestep;
 
    // printf("fitness: %d\n", *fitness);
+
+   if (DRAW) snaken_graphics_end();
 
    return BHM_ERROR_NONE;
 }
@@ -298,8 +330,8 @@ int main(void) {
       c2d_to_file(&(cortices_pop->cortices[cortices_pop->selection_pool[0]]), fileName);
 
       printf("Crossover %d\n", i);
-      // bhm_error = p2d_crossover(cortices_pop, BHM_TRUE);
-      bhm_error = p2d_crossover(cortices_pop, BHM_FALSE);
+      bhm_error = p2d_crossover(cortices_pop, BHM_TRUE);
+      // bhm_error = p2d_crossover(cortices_pop, BHM_FALSE);
       // bhm_error = p2d_mutate(cortices_pop);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error crossing survivors over: %d\n", bhm_error);

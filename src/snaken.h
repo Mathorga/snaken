@@ -1,6 +1,6 @@
 /*
 *****************************************************************
-cortex.h
+snaken.h
 
 Copyright (C) 2024 Luka Micheletti
 *****************************************************************
@@ -180,7 +180,11 @@ typedef struct {
 /// @param world_width The width of the snaken world.
 /// @param world_height The height of the snaken world.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
-snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world_width, snaken_world_size_t world_height);
+snaken_error_code_t snaken2d_init(
+    snaken2d_t** snaken,
+    snaken_world_size_t world_width,
+    snaken_world_size_t world_height
+);
 
 // ##########################################
 // ##########################################
@@ -193,7 +197,9 @@ snaken_error_code_t snaken2d_init(snaken2d_t** snaken, snaken_world_size_t world
 /// @brief Performs a single run cycle in the provided snaken.
 /// @param snaken The snaken to run the loop in.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
-snaken_error_code_t snaken2d_tick(snaken2d_t* snaken);
+snaken_error_code_t snaken2d_tick(
+    snaken2d_t* snaken
+);
 
 // ##########################################
 // ##########################################
@@ -207,7 +213,10 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken);
 /// @param view The view to populate from the given snaken.
 /// @param snaken The snaken to extract the view from.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
-snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type_t* view);
+snaken_error_code_t snaken2d_get_snake_view(
+    snaken2d_t* snaken,
+    snaken_cell_type_t* view
+);
 
 // ##########################################
 // ##########################################
@@ -221,7 +230,28 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
 /// @param snaken The snaken to apply the snake direction to.
 /// @param direction The direction to set the snake to.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
-snaken_error_code_t snaken2d_set_snake_dir(snaken2d_t* snaken, snaken_dir_t direction);
+snaken_error_code_t snaken2d_set_snake_dir(
+    snaken2d_t* snaken,
+    snaken_dir_t direction
+);
+
+/// @brief Sets the snake view radius.
+/// @param snaken The snaken to apply the snake view radius to.
+/// @param radius The radius to set the snake.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+snaken_error_code_t snaken2d_set_snake_view_radius(
+    snaken2d_t* snaken,
+    snaken_world_size_t radius
+);
+
+/// @brief TODO
+/// @param snaken 
+/// @param length 
+/// @return 
+snaken_error_code_t snaken2d_set_snake_length(
+    snaken2d_t* snaken,
+    snaken_world_size_t length
+);
 
 /// @brief Turns the snake left relative to its current direction.
 /// @param snaken The snaken to apply the turn to.

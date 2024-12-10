@@ -4,7 +4,7 @@ STD_CCOMP_FLAGS=-std=c17 -Wall -pedantic -g
 CCOMP_FLAGS=$(STD_CCOMP_FLAGS)
 CLINK_FLAGS=-Wall
 
-LIBS=-lraylib -lm -lGL -lpthread -ldl -lrt -lX11 -lsnaken
+LIBS=-lm -lGL -lpthread -ldl -lrt -lX11 -lsnaken
 
 SRC_DIR=./src
 BLD_DIR=./bld
