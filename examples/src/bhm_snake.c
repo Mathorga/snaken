@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <snaken/snaken.h>
-#include <snaken/graphics.h>
+// #include <snaken/graphics.h>
 #include <behema/behema.h>
 
-snaken_bool_t DRAW = SNAKEN_FALSE;
+// snaken_bool_t DRAW = SNAKEN_FALSE;
 
 double lerp(double a, double b, double t) {
     return a + t * (b - a);
@@ -194,11 +194,11 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    // ##########################################
 
-   if (DRAW)
-      snaken_graphics_begin(
-         screen_width,
-         screen_height
-      );
+   // if (DRAW)
+   //    snaken_graphics_begin(
+   //       screen_width,
+   //       screen_height
+   //    );
 
    // ##########################################
    // Run evaluation.
@@ -261,7 +261,7 @@ bhm_error_code_t eval_cortex(
          snaken2d_turn_right(snaken);
       }
 
-      if (DRAW) snaken_graphics_draw(snaken);
+      // if (DRAW) snaken_graphics_draw(snaken);
    }
    // ##########################################
    // ##########################################
@@ -270,7 +270,7 @@ bhm_error_code_t eval_cortex(
 
    // printf("fitness: %d\n", *fitness);
 
-   if (DRAW) snaken_graphics_end();
+   // if (DRAW) snaken_graphics_end();
 
    return BHM_ERROR_NONE;
 }
