@@ -3,8 +3,6 @@
 // #include <snaken/graphics.h>
 #include <behema/behema.h>
 
-// snaken_bool_t DRAW = SNAKEN_FALSE;
-
 double lerp(double a, double b, double t) {
     return a + t * (b - a);
 }
@@ -63,10 +61,6 @@ bhm_error_code_t eval_cortex(
 ) {
    const int world_width = 30;
    const int world_height = 30;
-
-   int screen_width = world_width * 20;
-   int screen_height = world_height * 20;
-
 
    // ##########################################
    // Init cortices.
@@ -194,12 +188,6 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    // ##########################################
 
-   // if (DRAW)
-   //    snaken_graphics_begin(
-   //       screen_width,
-   //       screen_height
-   //    );
-
    // ##########################################
    // Run evaluation.
    // ##########################################
@@ -229,7 +217,6 @@ bhm_error_code_t eval_cortex(
          }
       }
       i2d_mean(input, &mean_input);
-      // printf("mean_input %d\n", mean_input);
       c2d_feed2d(prev_cortex, input);
       // c2d_to_file(cortex, (char*) "out/test.c2d");
 
@@ -249,19 +236,13 @@ bhm_error_code_t eval_cortex(
       o2d_mean(left_output, &mean_left_output);
       o2d_mean(right_output, &mean_right_output);
 
-      // if (mean_left_output > 0 || mean_right_output > 0)
-      //    printf("%d|%d\n", mean_left_output, mean_right_output);
-
       // Use cortex output to control the snake.
       if (mean_left_output > mean_right_output) {
-         // printf("turning left\n");
          snaken2d_turn_left(snaken);
       } else if (mean_right_output > mean_left_output) {
-         // printf("turning right\n");
          snaken2d_turn_right(snaken);
       }
 
-      // if (DRAW) snaken_graphics_draw(snaken);
    }
    // ##########################################
    // ##########################################
@@ -269,8 +250,6 @@ bhm_error_code_t eval_cortex(
    *fitness = snaken->snake_length + timestep;
 
    // printf("fitness: %d\n", *fitness);
-
-   // if (DRAW) snaken_graphics_end();
 
    return BHM_ERROR_NONE;
 }
@@ -331,8 +310,6 @@ int main(void) {
 
       printf("Crossover %d\n", i);
       bhm_error = p2d_crossover(cortices_pop, BHM_TRUE);
-      // bhm_error = p2d_crossover(cortices_pop, BHM_FALSE);
-      // bhm_error = p2d_mutate(cortices_pop);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error crossing survivors over: %d\n", bhm_error);
          return 1;
