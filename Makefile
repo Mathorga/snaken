@@ -9,7 +9,7 @@ ARC_FLAGS=-rcs
 # Mode flag: if set to "archive", installs snaken as a static library.
 MODE=
 
-STD_LIBS=-lrt -lm
+STD_LIBS=-lm
 
 SRC_DIR=./src
 BLD_DIR=./bld
@@ -31,6 +31,7 @@ UNAME_S=$(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	SYSTEM_INCLUDE_DIR=/usr/include
 	SYSTEM_LIB_DIR=/usr/lib
+	STD_LIBS+=-lrt
 endif
 
 # The current OS is MacOS.
