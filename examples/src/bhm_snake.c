@@ -266,7 +266,7 @@ int main(void) {
       &cortices_pop,
       10,
       5,
-      0xFFFFFFFF,
+      0x000000FF,
       &eval_cortex
       // &dummy_evals
    );
