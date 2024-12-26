@@ -51,6 +51,14 @@ void print_snake_view(
     printf("\n");
 }
 
+bhm_error_code_t dummy_eval(
+   bhm_cortex2d_t* cortex,
+   bhm_cortex_fitness_t* fitness
+) {
+   *fitness = 0x00;
+   return BHM_ERROR_NONE;
+}
+
 /// @brief Evaluates the provided cortex.
 /// @param cortex The cortex to evaluate.
 /// @param fitness The cortex fitness score as a result of the evaluation process.
@@ -266,9 +274,9 @@ int main(void) {
       &cortices_pop,
       10,
       5,
-      0x0000FFFF,
-      &eval_cortex
-      // &dummy_evals
+      0xFFFFFFFF,
+      // &eval_cortex
+      &dummy_eval
    );
    if (bhm_error != BHM_ERROR_NONE) {
       printf("There was an error initializing the population: %d\n", bhm_error);
