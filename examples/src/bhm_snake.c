@@ -274,9 +274,9 @@ int main(void) {
       &cortices_pop,
       10,
       5,
-      0xFFFFFFFF,
-      // &eval_cortex
-      &dummy_eval
+      0x000FFFFF,
+      &eval_cortex
+      // &dummy_eval
    );
    if (bhm_error != BHM_ERROR_NONE) {
       printf("There was an error initializing the population: %d\n", bhm_error);
