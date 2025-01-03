@@ -274,7 +274,7 @@ int main(void) {
       &cortices_pop,
       10,
       5,
-      0x000FFFFF,
+      0x00FFFFFF,
       &eval_cortex
       // &dummy_eval
    );
@@ -289,7 +289,6 @@ int main(void) {
    }
    // ##########################################
    // ##########################################
-
 
    // ##########################################
    // Evolve the population.
@@ -322,6 +321,10 @@ int main(void) {
          printf("There was an error crossing survivors over: %d\n", bhm_error);
          return 1;
       }
+
+      // for (bhm_population_size_t i = 0; i < cortices_pop->size; i++) {
+      //    printf("RAND_STATE: %d\n", cortices_pop->cortices[i].rand_state);
+      // }
    }
    // ##########################################
    // ##########################################
