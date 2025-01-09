@@ -4,7 +4,12 @@
 #include <behema/behema.h>
 
 double lerp(double a, double b, double t) {
-    return a + t * (b - a);
+   return a + t * (b - a);
+}
+
+int clamp(int d, int min, int max) {
+   const int t = d < min ? min : d;
+   return t > max ? max : t;
 }
 
 /// @brief Maps the provided snake view to an array of pulses.
@@ -140,7 +145,7 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    bhm_ticks_count_t mean_input = 0;
    snaken_world_size_t snaken_view_width = NH_DIAM_2D(snaken->snake_view_radius);
-   bhm_cortex_size_t input_width = snaken_view_width * snaken_view_width;
+   bhm_cortex_size_t input_width = clamp(snaken_view_width * snaken_view_width, 0, cortex->width);
    bhm_input2d_t* input;
    bhm_error = i2d_init(
       &input,
@@ -274,7 +279,7 @@ int main(void) {
       &cortices_pop,
       10,
       5,
-      0x00FFFFFF,
+      0x0FFFFFFF,
       &eval_cortex
       // &dummy_eval
    );
@@ -307,7 +312,7 @@ int main(void) {
          return 1;
       }
       for (bhm_population_size_t i = 0; i < cortices_pop->selection_pool_size; i++) {
-         printf("SELECTION_POOL %d\n", cortices_pop->selection_pool[i]);
+         printf("SELECTION_POOL %d, fitness: %d\n", cortices_pop->selection_pool[i], cortices_pop->cortices_fitness[cortices_pop->selection_pool[i]]);
       }
 
       // Save the best cortex to file before the population is reset by crossover.
