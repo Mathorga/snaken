@@ -317,8 +317,10 @@ int main(void) {
 
       // Save the best cortex to file before the population is reset by crossover.
       char fileName[100];
-      snprintf(fileName, 100, "out/bog_%d.c2d", i);
-      c2d_to_file(&(cortices_pop->cortices[cortices_pop->selection_pool[0]]), fileName);
+      // snprintf(fileName, 100, "out/bog_%d.c2d", i);
+      // c2d_to_file(&(cortices_pop->cortices[cortices_pop->selection_pool[0]]), fileName);
+      snprintf(fileName, 100, "out/pop_%d.p2d", i);
+      p2d_to_file(cortices_pop, fileName);
 
       printf("Crossover %d\n", i);
       bhm_error = p2d_crossover(cortices_pop, BHM_TRUE);
