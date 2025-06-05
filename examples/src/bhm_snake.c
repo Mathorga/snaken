@@ -299,6 +299,12 @@ int main(void) {
    // Evolve the population.
    // ##########################################
    for (uint16_t i = 0; i < 1000; i++) {
+      // Save the population to file before evalutaion.
+      printf("Dumping population %d\n", i);
+      char file_name[100];
+      snprintf(file_name, 100, "out/pop_%d.p2d", i);
+      p2d_to_file(cortices_pop, file_name);
+
       printf("Evaluation %d\n", i);
       bhm_error = p2d_evaluate(cortices_pop);
       if (bhm_error != BHM_ERROR_NONE) {
@@ -316,11 +322,9 @@ int main(void) {
       }
 
       // Save the best cortex to file before the population is reset by crossover.
-      char fileName[100];
-      // snprintf(fileName, 100, "out/bog_%d.c2d", i);
-      // c2d_to_file(&(cortices_pop->cortices[cortices_pop->selection_pool[0]]), fileName);
-      snprintf(fileName, 100, "out/pop_%d.p2d", i);
-      p2d_to_file(cortices_pop, fileName);
+      // char file_name[100];
+      // snprintf(file_name, 100, "out/bog_%d.c2d", i);
+      // c2d_to_file(&(cortices_pop->cortices[cortices_pop->selection_pool[0]]), file_name);
 
       printf("Crossover %d\n", i);
       bhm_error = p2d_crossover(cortices_pop, BHM_TRUE);
