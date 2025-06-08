@@ -272,7 +272,7 @@ int main(int argc, char** argv) {
 
    bhm_error_code_t bhm_error;
    bhm_population2d_t* cortices_pop;
-   char* src_pop_file_name;
+   char* src_pop_file_name = NULL;
 
    // ##########################################
    // Input handling.
@@ -294,7 +294,10 @@ int main(int argc, char** argv) {
       // Read population from file.
       // ##########################################
 
+      // When reading a population from file, the population must be allocated first, since p2d_from_file does not manage allocation by itself.
+      cortices_pop = (bhm_population2d_t *) malloc(sizeof(bhm_cortex2d_t));
       p2d_from_file(cortices_pop, src_pop_file_name);
+      p2d_set_eval_function(cortices_pop, &eval_cortex);
 
       // ##########################################
       // ##########################################
