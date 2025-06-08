@@ -267,33 +267,62 @@ bhm_error_code_t eval_cortex(
    return BHM_ERROR_NONE;
 }
 
-int main(void) {
+int main(int argc, char** argv) {
    srand(time(NULL));
 
-   // ##########################################
-   // Init cortices population.
-   // ##########################################
    bhm_error_code_t bhm_error;
    bhm_population2d_t* cortices_pop;
-   bhm_error = p2d_init(
-      &cortices_pop,
-      10,
-      5,
-      0x0FFFFFFF,
-      &eval_cortex
-      // &dummy_eval
-   );
-   if (bhm_error != BHM_ERROR_NONE) {
-      printf("There was an error initializing the population: %d\n", bhm_error);
-      return 1;
-   }
-   bhm_error = p2d_populate(cortices_pop, 64, 48, 2);
-   if (bhm_error != BHM_ERROR_NONE) {
-      printf("There was an error population the cortices: %d\n", bhm_error);
-      return 1;
-   }
+   char* src_pop_file_name;
+
    // ##########################################
+   // Input handling.
    // ##########################################
+   switch (argc) {
+      case 1:
+         break;
+      case 2:
+         src_pop_file_name = argv[1];
+         break;
+      default:
+         printf("USAGE: bhm_snake <src_pop_file_name>\n");
+         exit(0);
+         break;
+   }
+
+   if (src_pop_file_name != NULL) {
+      // ##########################################
+      // Read population from file.
+      // ##########################################
+
+      p2d_from_file(cortices_pop, src_pop_file_name);
+
+      // ##########################################
+      // ##########################################
+   } else {
+      // ##########################################
+      // Init cortices population.
+      // ##########################################
+
+      bhm_error = p2d_init(
+         &cortices_pop,
+         10,
+         5,
+         0x0FFFFFFF,
+         &eval_cortex
+         // &dummy_eval
+      );
+      if (bhm_error != BHM_ERROR_NONE) {
+         printf("There was an error initializing the population: %d\n", bhm_error);
+         return 1;
+      }
+      bhm_error = p2d_populate(cortices_pop, 64, 48, 2);
+      if (bhm_error != BHM_ERROR_NONE) {
+         printf("There was an error population the cortices: %d\n", bhm_error);
+         return 1;
+      }
+      // ##########################################
+      // ##########################################
+   }
 
    // ##########################################
    // Evolve the population.
