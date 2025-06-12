@@ -11,6 +11,7 @@ BHM_LIBS=-lbehema
 SRC_DIR=./src
 BLD_DIR=./bld
 BIN_DIR=./bin
+IN_DIR=./in
 OUT_DIR=./out
 
 # Adds BLD_DIR to object parameter names.
@@ -47,9 +48,11 @@ bhm_snake: create
 create:
 	$(MKDIR) $(BLD_DIR)
 	$(MKDIR) $(BIN_DIR)
+	$(MKDIR) $(IN_DIR)
 	$(MKDIR) $(OUT_DIR)
 
 clean:
 	$(RM) $(BLD_DIR)
 	$(RM) $(BIN_DIR)
+	$(RM) $(IN_DIR)
 	$(RM) $(OUT_DIR)
