@@ -298,11 +298,9 @@ int main(int argc, char** argv) {
       cortices_pop = (bhm_population2d_t *) malloc(sizeof(bhm_cortex2d_t));
       p2d_from_file(cortices_pop, src_pop_file_name);
       p2d_set_eval_function(cortices_pop, &eval_cortex);
-      for (bhm_population_size_t i = 0; i < cortices_pop->size; i++) {
-         char cortex_string[500];
-         c2d_to_string(&(cortices_pop->cortices[i]), cortex_string);
-         printf("%s\n", cortex_string);
-      }
+      // char pop_string[500];
+      // p2d_to_string(cortices_pop, pop_string);
+      // printf("%s\n", pop_string);
 
       // ##########################################
       // ##########################################
