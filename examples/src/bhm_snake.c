@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <snaken/snaken.h>
-// #include <snaken/graphics.h>
 #include <behema/behema.h>
 
 double lerp(double a, double b, double t) {
@@ -298,9 +297,14 @@ int main(int argc, char** argv) {
       cortices_pop = (bhm_population2d_t *) malloc(sizeof(bhm_cortex2d_t));
       p2d_from_file(cortices_pop, src_pop_file_name);
       p2d_set_eval_function(cortices_pop, &eval_cortex);
-      // char pop_string[500];
-      // p2d_to_string(cortices_pop, pop_string);
-      // printf("%s\n", pop_string);
+      // p2d_set_eval_function(cortices_pop, &dummy_eval);
+
+      // for (bhm_population_size_t i; i < cortices_pop->size; i++) {
+      //    char pop_string[500];
+      //    c2d_to_string(&(cortices_pop->cortices[i]), pop_string);
+      //    printf("FITNESS: %d\n", cortices_pop->cortices_fitness[i]);
+      //    printf("%s\n", pop_string);
+      // }
 
       // ##########################################
       // ##########################################
