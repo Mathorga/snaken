@@ -266,27 +266,9 @@ bhm_error_code_t eval_cortex(
    return BHM_ERROR_NONE;
 }
 
-int main(int argc, char** argv) {
-   srand(time(NULL));
-
+int train(char* src_pop_file_name) {
    bhm_error_code_t bhm_error;
    bhm_population2d_t* cortices_pop;
-   char* src_pop_file_name = NULL;
-
-   // ##########################################
-   // Input handling.
-   // ##########################################
-   switch (argc) {
-      case 1:
-         break;
-      case 2:
-         src_pop_file_name = argv[1];
-         break;
-      default:
-         printf("USAGE: bhm_snake <src_pop_file_name>\n");
-         exit(0);
-         break;
-   }
 
    if (src_pop_file_name != NULL) {
       // ##########################################
@@ -384,6 +366,42 @@ int main(int argc, char** argv) {
    // Cleanup.
    // ##########################################
    p2d_destroy(cortices_pop);
+   // ##########################################
+   // ##########################################
+
+   return 0;
+}
+
+int main(int argc, char** argv) {
+   srand(time(NULL));
+
+   // ##########################################
+   // Input handling.
+   // ##########################################
+
+   if (argc < 2) {
+      printf("No command provided. Type \"bhm_snake help\" for a list of all available commands\n");
+      return 1;
+   }
+
+   if (argc >= 2) {
+      if (strcmp(argv[1], "train") == 0) {
+         // Train.
+         return train(argc > 2 ? argv[2] : NULL);
+      }
+
+      if (strcmp(argv[1], "help") == 0) {
+         // TODO.
+         printf("Help requested\n");
+         return 0;
+      }
+
+      if (strcmp(argv[1], "run") == 0) {
+         // TODO.
+         printf("Unimplemented\n");
+         return 0;
+      }
+   }
    // ##########################################
    // ##########################################
 
