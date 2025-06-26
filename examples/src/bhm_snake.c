@@ -263,10 +263,32 @@ bhm_error_code_t eval_cortex(
 
    // printf("fitness: %d\n", *fitness);
 
+   // Cleanup.
+   bhm_error = c2d_destroy(tmp_cortex);
+   if (bhm_error != BHM_ERROR_NONE) {
+      printf("There was an error destroying the tmp cortex: %d\n", bhm_error);
+      return bhm_error;
+   }
+   bhm_error = i2d_destroy(input);
+   if (bhm_error != BHM_ERROR_NONE) {
+      printf("There was an error destroying the cortex input: %d\n", bhm_error);
+      return bhm_error;
+   }
+   bhm_error = o2d_destroy(left_output);
+   if (bhm_error != BHM_ERROR_NONE) {
+      printf("There was an error destroying the left output: %d\n", bhm_error);
+      return bhm_error;
+   }
+   bhm_error = o2d_destroy(right_output);
+   if (bhm_error != BHM_ERROR_NONE) {
+      printf("There was an error destroying the right output: %d\n", bhm_error);
+      return bhm_error;
+   }
+
    return BHM_ERROR_NONE;
 }
 
-int train(char* src_pop_file_name) {
+int evolve(char* src_pop_file_name) {
    bhm_error_code_t bhm_error;
    bhm_population2d_t* cortices_pop;
 
@@ -385,9 +407,9 @@ int main(int argc, char** argv) {
    }
 
    if (argc >= 2) {
-      if (strcmp(argv[1], "train") == 0) {
-         // Train.
-         return train(argc > 2 ? argv[2] : NULL);
+      if (strcmp(argv[1], "evolve") == 0) {
+         // Evolve.
+         return evolve(argc > 2 ? argv[2] : NULL);
       }
 
       if (strcmp(argv[1], "help") == 0) {
