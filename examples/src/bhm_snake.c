@@ -290,7 +290,7 @@ bhm_error_code_t eval_cortex(
 
 int evolve(char* src_pop_file_name) {
    bhm_error_code_t bhm_error;
-   bhm_population2d_t* cortices_pop;
+   bhm_population2d_t* population;
 
    if (src_pop_file_name != NULL) {
       // ##########################################
@@ -298,15 +298,15 @@ int evolve(char* src_pop_file_name) {
       // ##########################################
 
       // When reading a population from file, the population must be allocated first, since p2d_from_file does not manage allocation by itself.
-      cortices_pop = (bhm_population2d_t *) malloc(sizeof(bhm_cortex2d_t));
-      p2d_from_file(cortices_pop, src_pop_file_name);
-      p2d_set_eval_function(cortices_pop, &eval_cortex);
-      // p2d_set_eval_function(cortices_pop, &dummy_eval);
+      population = (bhm_population2d_t *) malloc(sizeof(bhm_cortex2d_t));
+      p2d_from_file(population, src_pop_file_name);
+      // p2d_set_eval_function(population, &eval_cortex);
+      p2d_set_eval_function(population, &dummy_eval);
 
-      // for (bhm_population_size_t i; i < cortices_pop->size; i++) {
+      // for (bhm_population_size_t i; i < population->size; i++) {
       //    char pop_string[500];
-      //    c2d_to_string(&(cortices_pop->cortices[i]), pop_string);
-      //    printf("FITNESS: %d\n", cortices_pop->cortices_fitness[i]);
+      //    c2d_to_string(&(population->cortices[i]), pop_string);
+      //    printf("FITNESS: %d\n", population->cortices_fitness[i]);
       //    printf("%s\n", pop_string);
       // }
 
@@ -318,18 +318,18 @@ int evolve(char* src_pop_file_name) {
       // ##########################################
 
       bhm_error = p2d_init(
-         &cortices_pop,
+         &population,
          10,
          5,
          0x0FFFFFFF,
-         &eval_cortex
-         // &dummy_eval
+         // &eval_cortex
+         &dummy_eval
       );
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error initializing the population: %d\n", bhm_error);
          return 1;
       }
-      bhm_error = p2d_populate(cortices_pop, 64, 48, 2);
+      bhm_error = p2d_populate(population, 64, 48, 2);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error population the cortices: %d\n", bhm_error);
          return 1;
@@ -346,39 +346,35 @@ int evolve(char* src_pop_file_name) {
       printf("Dumping population %d\n", i);
       char file_name[100];
       snprintf(file_name, 100, "out/pop_%d.p2d", i);
-      p2d_to_file(cortices_pop, file_name);
+      p2d_to_file(population, file_name);
 
       printf("Evaluation %d\n", i);
-      bhm_error = p2d_evaluate(cortices_pop);
+      bhm_error = p2d_evaluate(population);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error evaluating the cortices: %d\n", bhm_error);
          return 1;
       }
       printf("Selection %d\n", i);
-      bhm_error = p2d_select(cortices_pop);
+      bhm_error = p2d_select(population);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error selecting survivors: %d\n", bhm_error);
          return 1;
       }
-      for (bhm_population_size_t i = 0; i < cortices_pop->selection_pool_size; i++) {
-         printf("SELECTION_POOL %d, fitness: %d\n", cortices_pop->selection_pool[i], cortices_pop->cortices_fitness[cortices_pop->selection_pool[i]]);
+      for (bhm_population_size_t i = 0; i < population->selection_pool_size; i++) {
+         printf("SELECTION_POOL %d, fitness: %d\n", population->selection_pool[i], population->cortices_fitness[population->selection_pool[i]]);
       }
 
       // Save the best cortex to file before the population is reset by crossover.
       // char file_name[100];
       // snprintf(file_name, 100, "out/bog_%d.c2d", i);
-      // c2d_to_file(&(cortices_pop->cortices[cortices_pop->selection_pool[0]]), file_name);
+      // c2d_to_file(&(population->cortices[population->selection_pool[0]]), file_name);
 
       printf("Crossover %d\n", i);
-      bhm_error = p2d_crossover(cortices_pop, BHM_TRUE);
+      bhm_error = p2d_crossover(population, BHM_TRUE);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error crossing survivors over: %d\n", bhm_error);
          return 1;
       }
-
-      // for (bhm_population_size_t i = 0; i < cortices_pop->size; i++) {
-      //    printf("RAND_STATE: %d\n", cortices_pop->cortices[i].rand_state);
-      // }
    }
    // ##########################################
    // ##########################################
@@ -387,7 +383,7 @@ int evolve(char* src_pop_file_name) {
    // ##########################################
    // Cleanup.
    // ##########################################
-   p2d_destroy(cortices_pop);
+   p2d_destroy(population);
    // ##########################################
    // ##########################################
 
