@@ -284,6 +284,11 @@ bhm_error_code_t eval_cortex(
       printf("There was an error destroying the right output: %d\n", bhm_error);
       return bhm_error;
    }
+   snaken_error = snaken2d_destroy(snaken);
+   if (snaken_error != SNAKEN_ERROR_NONE) {
+      printf("There was an error destroying the snaken: %d\n", snaken_error);
+      return BHM_ERROR_EXTERNAL_CAUSES;
+   }
 
    return BHM_ERROR_NONE;
 }
@@ -300,8 +305,8 @@ int evolve(char* src_pop_file_name) {
       // When reading a population from file, the population must be allocated first, since p2d_from_file does not manage allocation by itself.
       population = (bhm_population2d_t *) malloc(sizeof(bhm_cortex2d_t));
       p2d_from_file(population, src_pop_file_name);
-      // p2d_set_eval_function(population, &eval_cortex);
-      p2d_set_eval_function(population, &dummy_eval);
+      p2d_set_eval_function(population, &eval_cortex);
+      // p2d_set_eval_function(population, &dummy_eval);
 
       // for (bhm_population_size_t i; i < population->size; i++) {
       //    char pop_string[500];
@@ -322,8 +327,8 @@ int evolve(char* src_pop_file_name) {
          10,
          5,
          0x0FFFFFFF,
-         // &eval_cortex
-         &dummy_eval
+         &eval_cortex
+         // &dummy_eval
       );
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error initializing the population: %d\n", bhm_error);
@@ -331,7 +336,7 @@ int evolve(char* src_pop_file_name) {
       }
       bhm_error = p2d_populate(population, 64, 48, 2);
       if (bhm_error != BHM_ERROR_NONE) {
-         printf("There was an error population the cortices: %d\n", bhm_error);
+         printf("There was an error populating the cortices: %d\n", bhm_error);
          return 1;
       }
       // ##########################################

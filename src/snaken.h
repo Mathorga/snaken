@@ -186,6 +186,13 @@ snaken_error_code_t snaken2d_init(
     snaken_world_size_t world_height
 );
 
+/// @brief Destroys the given snaken and frees memory for it and its data.
+/// @param cortex The snaken to destroy
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+snaken_error_code_t snaken2d_destroy(
+    snaken2d_t* snaken
+);
+
 // ##########################################
 // ##########################################
 

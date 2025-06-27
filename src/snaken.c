@@ -65,6 +65,16 @@ snaken_error_code_t snaken2d_init(
 
     return SNAKEN_ERROR_NONE;
 }
+
+snaken_error_code_t snaken2d_destroy(
+    snaken2d_t* snaken
+) {
+    free(snaken->walls);
+    free(snaken->snake_body);
+    free(snaken);
+
+    return SNAKEN_ERROR_NONE;
+}
 // ##########################################
 // ##########################################
 
