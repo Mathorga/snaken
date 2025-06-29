@@ -69,8 +69,11 @@ snaken_error_code_t snaken2d_init(
 snaken_error_code_t snaken2d_destroy(
     snaken2d_t* snaken
 ) {
+    // Only free snake body if the snake is still alive, otherwise it will already be freed.
+    if (snaken->snake_alive == SNAKEN_TRUE) free(snaken->snake_body);
+
     free(snaken->walls);
-    free(snaken->snake_body);
+    free(snaken->apples);
     free(snaken);
 
     return SNAKEN_ERROR_NONE;
