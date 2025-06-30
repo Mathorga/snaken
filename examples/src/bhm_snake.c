@@ -144,6 +144,7 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    bhm_ticks_count_t mean_input = 0;
    snaken_world_size_t snaken_view_width = NH_DIAM_2D(snaken->snake_view_radius);
+   snaken_cell_type_t* snake_view = (snaken_cell_type_t*) malloc(snaken_view_width * snaken_view_width * sizeof(snaken_cell_type_t));
    bhm_cortex_size_t input_width = clamp(snaken_view_width * snaken_view_width, 0, cortex->width);
    bhm_input2d_t* input;
    bhm_error = i2d_init(
@@ -214,8 +215,7 @@ bhm_error_code_t eval_cortex(
       bhm_cortex2d_t* next_cortex = timestep % 2 ? cortex : tmp_cortex;
 
       // Get snake view as input.
-      snaken_cell_type_t* view = (snaken_cell_type_t*) malloc(snaken_view_width * snaken_view_width * sizeof(snaken_cell_type_t));
-      snaken_error = snaken2d_get_snake_view(snaken, view);
+      snaken_error = snaken2d_get_snake_view(snaken, snake_view);
       if (snaken_error != SNAKEN_ERROR_NONE) {
          printf("There was an error retrieving the snake view: %d\n", snaken_error);
          return BHM_ERROR_EXTERNAL_CAUSES;
@@ -225,7 +225,7 @@ bhm_error_code_t eval_cortex(
       // Feed input to the cortex.
       for (bhm_cortex_size_t y = 0; y < input->y1 - input->y0; y++) {
          for (bhm_cortex_size_t x = 0; x < input->x1 - input->x0; x++) {
-            input->values[IDX2D(x, y, input->x1 - input->x0)] = snake_view_to_pulse(view[IDX2D(x, y, input->x1 - input->x0)], prev_cortex->sample_window);
+            input->values[IDX2D(x, y, input->x1 - input->x0)] = snake_view_to_pulse(snake_view[IDX2D(x, y, input->x1 - input->x0)], prev_cortex->sample_window);
          }
       }
       i2d_mean(input, &mean_input);
@@ -261,8 +261,6 @@ bhm_error_code_t eval_cortex(
 
    *fitness = snaken->snake_length + timestep;
 
-   // printf("fitness: %d\n", *fitness);
-
    // Cleanup.
    bhm_error = c2d_destroy(tmp_cortex);
    if (bhm_error != BHM_ERROR_NONE) {
@@ -289,6 +287,8 @@ bhm_error_code_t eval_cortex(
       printf("There was an error destroying the snaken: %d\n", snaken_error);
       return BHM_ERROR_EXTERNAL_CAUSES;
    }
+
+   free(snake_view);
 
    return BHM_ERROR_NONE;
 }
