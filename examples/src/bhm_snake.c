@@ -1,6 +1,12 @@
+// #define GRAPHICS
+
 #include <stdio.h>
 #include <snaken/snaken.h>
 #include <behema/behema.h>
+
+#ifdef GRAPHICS
+#include <snaken/graphics.h>
+#endif
 
 double lerp(double a, double b, double t) {
    return a + t * (b - a);
@@ -63,6 +69,52 @@ bhm_error_code_t dummy_eval(
    return BHM_ERROR_NONE;
 }
 
+snaken_error_code_t create_snaken(
+   snaken2d_t** snaken,
+   int world_width,
+   int world_height
+) {
+   snaken_error_code_t snaken_error;
+
+   snaken_error = snaken2d_init(snaken, world_width, world_height);
+   if (snaken_error != SNAKEN_ERROR_NONE) {
+      printf("There was an error initializing the snaken: %d\n", snaken_error);
+      return snaken_error;
+   }
+
+   snaken_error = snaken2d_set_snake_length(*snaken, 0xFFu);
+   if (snaken_error != SNAKEN_ERROR_NONE) {
+      printf("There was an error updating the snake length: %d\n", snaken_error);
+      return snaken_error;
+   }
+
+   snaken_error = snaken2d_set_snake_view_radius(*snaken, 0x03u);
+   if (snaken_error != SNAKEN_ERROR_NONE) {
+      printf("There was an error updating the snake view radius: %d\n", snaken_error);
+      return snaken_error;
+   }
+
+   snaken_error = snaken2d_set_snake_speed(*snaken, 0xF5);
+   if (snaken_error != SNAKEN_ERROR_NONE) {
+      printf("There was an error updating the snake speed: %d\n", snaken_error);
+      return snaken_error;
+   }
+
+   snaken_error = snaken2d_set_snake_stamina(*snaken, SNAKEN_SNAKE_STAMINA_LOW);
+   if (snaken_error != SNAKEN_ERROR_NONE) {
+      printf("There was an error updating the snake stamina: %d\n", snaken_error);
+      return snaken_error;
+   }
+
+   snaken_error = snaken2d_set_apples_count(*snaken, 0xAF);
+   if (snaken_error != SNAKEN_ERROR_NONE) {
+      printf("There was an error setting the amount of apples: %d\n", snaken_error);
+      return snaken_error;
+   }
+
+   return SNAKEN_ERROR_NONE;
+}
+
 /// @brief Evaluates the provided cortex.
 /// @param cortex The cortex to evaluate.
 /// @param fitness The cortex fitness score as a result of the evaluation process.
@@ -99,40 +151,10 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    snaken_error_code_t snaken_error;
 
-   snaken2d_t* snaken;
-   snaken_error = snaken2d_init(&snaken, world_width, world_height);
+   snaken2d_t* snaken = NULL;
+   snaken_error = create_snaken(&snaken, world_width, world_height);
    if (snaken_error != SNAKEN_ERROR_NONE) {
-      printf("There was an error initializing the snaken: %d\n", snaken_error);
-      return BHM_ERROR_EXTERNAL_CAUSES;
-   }
-
-   snaken_error = snaken2d_set_snake_length(snaken, 0xFFu);
-   if (snaken_error != SNAKEN_ERROR_NONE) {
-      printf("There was an error updating the snake length: %d\n", snaken_error);
-      return BHM_ERROR_EXTERNAL_CAUSES;
-   }
-
-   snaken_error = snaken2d_set_snake_view_radius(snaken, 0x03u);
-   if (snaken_error != SNAKEN_ERROR_NONE) {
-      printf("There was an error updating the snake view radius: %d\n", snaken_error);
-      return BHM_ERROR_EXTERNAL_CAUSES;
-   }
-
-   snaken_error = snaken2d_set_snake_speed(snaken, 0xF5);
-   if (snaken_error != SNAKEN_ERROR_NONE) {
-      printf("There was an error updating the snake speed: %d\n", snaken_error);
-      return BHM_ERROR_EXTERNAL_CAUSES;
-   }
-
-   snaken_error = snaken2d_set_snake_stamina(snaken, SNAKEN_SNAKE_STAMINA_MID);
-   if (snaken_error != SNAKEN_ERROR_NONE) {
-      printf("There was an error updating the snake stamina: %d\n", snaken_error);
-      return BHM_ERROR_EXTERNAL_CAUSES;
-   }
-
-   snaken_error = snaken2d_set_apples_count(snaken, 0xAF);
-   if (snaken_error != SNAKEN_ERROR_NONE) {
-      printf("There was an error setting the amount of apples: %d\n", snaken_error);
+      printf("There was an error creating the snaken: %d\n", snaken_error);
       return BHM_ERROR_EXTERNAL_CAUSES;
    }
    // ##########################################
@@ -204,12 +226,22 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    // Run evaluation.
    // ##########################################
+
+   #ifdef GRAPHICS
+   snaken_graphics_begin(
+      world_width * 20,
+      world_height * 20
+   );
+
+   SetTargetFPS(120);
+   #endif
+
    bhm_ticks_count_t timestep = 0;
    for (; timestep < 100000; timestep++) {
+      // if (timestep % 100 == 0) printf("TIMESTEP: %d\n", timestep);
+
       // Make sure the snake is still alive before going on.
-      if (!snaken->snake_alive) {
-         break;
-      }
+      if (!snaken->snake_alive) break;
 
       bhm_cortex2d_t* prev_cortex = timestep % 2 ? tmp_cortex : cortex;
       bhm_cortex2d_t* next_cortex = timestep % 2 ? cortex : tmp_cortex;
@@ -255,7 +287,15 @@ bhm_error_code_t eval_cortex(
          snaken2d_turn_right(snaken);
       }
 
+      #ifdef GRAPHICS
+      snaken_graphics_draw(snaken);
+      #endif
    }
+
+   #ifdef GRAPHICS
+   snaken_graphics_end();
+   #endif
+
    // ##########################################
    // ##########################################
 
@@ -294,6 +334,13 @@ bhm_error_code_t eval_cortex(
 }
 
 int evolve(char* src_pop_file_name) {
+   const int generations_count = 1e3;
+   const int population_size = 1e2;
+   const int population_selection_pool_size = 10;
+   const int cortices_width = 12;
+   const int cortices_height = 5;
+   const int cortices_nh_radius = 2;
+
    bhm_error_code_t bhm_error;
    bhm_population2d_t* population;
 
@@ -324,8 +371,8 @@ int evolve(char* src_pop_file_name) {
 
       bhm_error = p2d_init(
          &population,
-         10,
-         5,
+         population_size,
+         population_selection_pool_size,
          0x0FFFFFFF,
          &eval_cortex
          // &dummy_eval
@@ -334,7 +381,13 @@ int evolve(char* src_pop_file_name) {
          printf("There was an error initializing the population: %d\n", bhm_error);
          return 1;
       }
-      bhm_error = p2d_populate(population, 64, 48, 2);
+
+      bhm_error = p2d_populate(
+         population,
+         cortices_width,
+         cortices_height,
+         cortices_nh_radius
+      );
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error populating the cortices: %d\n", bhm_error);
          return 1;
@@ -346,7 +399,7 @@ int evolve(char* src_pop_file_name) {
    // ##########################################
    // Evolve the population.
    // ##########################################
-   for (uint16_t i = 0; i < 1000; i++) {
+   for (uint16_t i = 0; i < generations_count; i++) {
       // Save the population to file before evalutaion.
       printf("Dumping population %d\n", i);
       char file_name[100];

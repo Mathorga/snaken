@@ -343,6 +343,14 @@ snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken, snaken_world_size_t
                 break;
             }
         }
+
+        // Make sure the picked location is free from other apples.
+        // for (snaken_world_size_t i = 0; i < snaken->apples_length; i++) {
+        //     if (snaken->apples[i] == apple_location) {
+        //         location_free = SNAKEN_FALSE;
+        //         break;
+        //     }
+        // }
     } while(!location_free);
 
     snaken->apples[index] = apple_location;
