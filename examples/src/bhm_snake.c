@@ -27,22 +27,23 @@ bhm_ticks_count_t snake_view_to_pulse(
 ) {
    int damping = 10;
    // 4 is the max possible snaken_cell_type_t value.
+   printf("sample_window: %d, mapping: %d\n", sample_window, (sample_window / (4 + damping)) * (snake_view + damping));
    return (sample_window / (4 + damping)) * (snake_view + damping);
 }
 
 char cell_type_to_char(snaken_cell_type_t cell_type) {
     switch (cell_type) {
         case SNAKEN_SNAKE_HEAD:
-            return 'O';
+            return 'X';
         case SNAKEN_SNAKE_BODY:
-            return 'o';
+            return 'x';
         case SNAKEN_APPLE:
             return '@';
         case SNAKEN_WALL:
             return 'H';
         case SNAKEN_EMPTY:
         default:
-            return '+';
+            return '.';
     }
 }
 
@@ -182,6 +183,9 @@ bhm_error_code_t eval_cortex(
       printf("There was an error allocating input %d\n", bhm_error);
       return bhm_error;
    }
+
+   // Compute ratio between input width and snake view width in order to map the view to the input.
+   double view_to_input_x_ratio = snaken_view_width / input_width;
    // ##########################################
    // ##########################################
 
@@ -238,7 +242,6 @@ bhm_error_code_t eval_cortex(
 
    bhm_ticks_count_t timestep = 0;
    for (; timestep < 100000; timestep++) {
-      // if (timestep % 100 == 0) printf("TIMESTEP: %d\n", timestep);
 
       // Make sure the snake is still alive before going on.
       if (!snaken->snake_alive) break;
@@ -252,17 +255,22 @@ bhm_error_code_t eval_cortex(
          printf("There was an error retrieving the snake view: %d\n", snaken_error);
          return BHM_ERROR_EXTERNAL_CAUSES;
       }
-      // print_snake_view(view, snaken_view_width);
+      printf("SNAKE_DIR: %d\n", snaken->snake_direction);
+      print_snake_view(snake_view, snaken_view_width);
 
       // Feed input to the cortex.
+      // Only the frontal snake view is fed as input to the network.
       for (bhm_cortex_size_t y = 0; y < input->y1 - input->y0; y++) {
          for (bhm_cortex_size_t x = 0; x < input->x1 - input->x0; x++) {
+            double snake_view_x = view_to_input_x_ratio * x;
+
+            // int snake_view_value = round(snake_view_x);
+
             input->values[IDX2D(x, y, input->x1 - input->x0)] = snake_view_to_pulse(snake_view[IDX2D(x, y, input->x1 - input->x0)], prev_cortex->sample_window);
          }
       }
       i2d_mean(input, &mean_input);
       c2d_feed2d(prev_cortex, input);
-      // c2d_to_file(cortex, (char*) "out/test.c2d");
 
       // Tick the cortex.
       c2d_tick(prev_cortex, next_cortex);
@@ -373,7 +381,7 @@ int evolve(char* src_pop_file_name) {
          &population,
          population_size,
          population_selection_pool_size,
-         0x0FFFFFFF,
+         0x00FFFFFF,
          &eval_cortex
          // &dummy_eval
       );
