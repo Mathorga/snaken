@@ -263,6 +263,8 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
             break;
     }
 
+    free(tmp_view);
+
     return SNAKEN_ERROR_NONE;
 }
 
