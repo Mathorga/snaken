@@ -27,7 +27,7 @@ bhm_ticks_count_t snake_view_to_pulse(
 ) {
    int damping = 10;
    // 4 is the max possible snaken_cell_type_t value.
-   printf("sample_window: %d, mapping: %d\n", sample_window, (sample_window / (4 + damping)) * (snake_view + damping));
+   // printf("sample_window: %d, mapping: %d\n", sample_window, (sample_window / (4 + damping)) * (snake_view + damping));
    return (sample_window / (4 + damping)) * (snake_view + damping);
 }
 
@@ -176,7 +176,7 @@ bhm_error_code_t eval_cortex(
       0,
       (cortex->width / 2) + (input_width / 2),
       1,
-      1000,
+      BHM_MAX_EXC_VALUE,
       BHM_PULSE_MAPPING_FPROP
    );
    if (bhm_error != BHM_ERROR_NONE) {
@@ -184,8 +184,6 @@ bhm_error_code_t eval_cortex(
       return bhm_error;
    }
 
-   // Compute ratio between input width and snake view width in order to map the view to the input.
-   double view_to_input_x_ratio = snaken_view_width / input_width;
    // ##########################################
    // ##########################################
 
@@ -262,11 +260,17 @@ bhm_error_code_t eval_cortex(
       // Only the frontal snake view is fed as input to the network.
       for (bhm_cortex_size_t y = 0; y < input->y1 - input->y0; y++) {
          for (bhm_cortex_size_t x = 0; x < input->x1 - input->x0; x++) {
-            double snake_view_x = view_to_input_x_ratio * x;
+            float t = ((float) x) * (snaken_view_width - 1) / (input_width - 1);
+            int index = (int) t;
+            float frac = t - index;
 
-            // int snake_view_value = round(snake_view_x);
-
-            input->values[IDX2D(x, y, input->x1 - input->x0)] = snake_view_to_pulse(snake_view[IDX2D(x, y, input->x1 - input->x0)], prev_cortex->sample_window);
+            if (index < snaken_view_width - 1) {
+               bhm_ticks_count_t lower_view_value = snake_view_to_pulse(snake_view[IDX2D(index, y, snaken_view_width)], prev_cortex->sample_window) * (1 - frac);
+               bhm_ticks_count_t higher_view_value = snake_view_to_pulse(snake_view[IDX2D(index + 1, y, snaken_view_width)], prev_cortex->sample_window) * frac;
+               input->values[IDX2D(x, y, input->x1 - input->x0)] = lower_view_value + higher_view_value;
+            } else {
+               input->values[IDX2D(x, y, input->x1 - input->x0)] = snake_view_to_pulse(snake_view[IDX2D(index, y, snaken_view_width)], prev_cortex->sample_window);
+            }
          }
       }
       i2d_mean(input, &mean_input);
