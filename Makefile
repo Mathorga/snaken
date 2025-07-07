@@ -18,6 +18,12 @@ BIN_DIR=./bin
 SYSTEM_INCLUDE_DIR=
 SYSTEM_LIB_DIR=
 
+OBJECTS=snaken.o utils.o
+
+ifeq ($(GRAPHICS),1)
+	OBJECTS+=graphics.o
+endif
+
 # Adds BLD_DIR to object parameter names.
 OBJS=$(patsubst %.o,$(BLD_DIR)/%.o,$^)
 
@@ -76,7 +82,7 @@ uninstall: clean
 std: create build
 
 # Builds all library files.
-build: snaken.o utils.o
+build: $(OBJECTS)
 	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BLD_DIR)/libsnaken.so
 	$(ARC) $(ARC_FLAGS) $(BLD_DIR)/libsnaken.a $(OBJS)
 	@printf "\nCompiled $@!\n"

@@ -5,8 +5,16 @@ CCOMP_FLAGS=$(STD_CCOMP_FLAGS)
 CLINK_FLAGS=-Wall
 
 COMMON_LIBS=-lm -lpthread -ldl -lsnaken
-GRAPHICS_LIBS=-lGL -lX11
+GRAPHICS_LIBS=-lraylib -lGL -lX11
 BHM_LIBS=-lbehema
+
+BHM_SNAKE_LIBS=
+
+ifeq ($(GRAPHICS),1)
+	BHM_SNAKE_LIBS=$(GRAPHICS_LIBS) $(COMMON_LIBS) $(BHM_LIBS)
+else
+	BHM_SNAKE_LIBS=$(COMMON_LIBS) $(BHM_LIBS)
+endif
 
 SRC_DIR=./src
 BLD_DIR=./bld
@@ -36,13 +44,13 @@ all: clean snake bhm_snake
 snake: create
 	@printf "\n"
 	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
-	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(COMMON_LIBS) $(GRAPHICS_LIBS)
+	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(GRAPHICS_LIBS) $(COMMON_LIBS)
 	@printf "\nCreated $@!\n"
 
 bhm_snake: create
 	@printf "\n"
 	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
-	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(COMMON_LIBS) $(BHM_LIBS)
+	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(BHM_SNAKE_LIBS)
 	@printf "\nCreated $@!\n"
 
 create:

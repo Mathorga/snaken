@@ -161,6 +161,9 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
 snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type_t* view) {
     snaken_world_size_t snake_view_diameter = NH_DIAM_2D(snaken->snake_view_radius);
 
+    // Allocate a new array in order to store the unrotated snake view.
+    snaken_cell_type_t* tmp_view = (snaken_cell_type_t*) malloc(snake_view_diameter * snake_view_diameter * sizeof(snaken_cell_type_t));
+
     // Populate the resulting snake view.
     for (snaken_world_size_t j = 0; j < snake_view_diameter; j++) {
         // Compute world-space j.
@@ -177,11 +180,11 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
             snaken_world_size_t global_location = IDX2D(global_i, global_j, snaken->world_width);
 
             // Prepopulate with empty space.
-            view[local_location] = SNAKEN_EMPTY;
+            tmp_view[local_location] = SNAKEN_EMPTY;
 
             // Check for snake head.
             if (snaken->snake_body[0] == global_location) {
-                view[local_location] = SNAKEN_SNAKE_HEAD;
+                tmp_view[local_location] = SNAKEN_SNAKE_HEAD;
                 continue;
             }
 
@@ -189,7 +192,7 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
             snaken_bool_t snake_found = SNAKEN_FALSE;
             for (snaken_world_size_t k = 1; k < snaken->snake_length; k++) {
                 if (snaken->snake_body[k] == global_location) {
-                    view[local_location] = SNAKEN_SNAKE_BODY;
+                    tmp_view[local_location] = SNAKEN_SNAKE_BODY;
                     snake_found = SNAKEN_TRUE;
                     break;
                 }
@@ -202,7 +205,7 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
             snaken_bool_t apple_found = SNAKEN_FALSE;
             for (snaken_world_size_t k = 0; k < snaken->apples_length; k++) {
                 if (snaken->apples[k] == global_location) {
-                    view[local_location] = SNAKEN_APPLE;
+                    tmp_view[local_location] = SNAKEN_APPLE;
                     apple_found = SNAKEN_TRUE;
                     break;
                 }
@@ -215,7 +218,7 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
             snaken_bool_t wall_found = SNAKEN_FALSE;
             for (snaken_world_size_t k = 0; k < snaken->walls_length; k++) {
                 if (snaken->walls[k] == global_location) {
-                    view[local_location] = SNAKEN_WALL;
+                    tmp_view[local_location] = SNAKEN_WALL;
                     wall_found = SNAKEN_TRUE;
                     break;
                 }
@@ -225,6 +228,43 @@ snaken_error_code_t snaken2d_get_snake_view(snaken2d_t* snaken, snaken_cell_type
             }
         }
     }
+
+    // Rotate the view according to snake direction.
+    switch (snaken->snake_direction) {
+        case SNAKEN_LEFT:
+            for (snaken_world_size_t y = 0; y < snake_view_diameter; y++) {
+                for (snaken_world_size_t x = 0; x < snake_view_diameter; x++) {
+                    view[IDX2D(x, y, snake_view_diameter)] = tmp_view[IDX2D(y, snake_view_diameter - 1 - x, snake_view_diameter)];
+                }
+            }
+            break;
+        case SNAKEN_RIGHT:
+            for (snaken_world_size_t y = 0; y < snake_view_diameter; y++) {
+                for (snaken_world_size_t x = 0; x < snake_view_diameter; x++) {
+                    view[IDX2D(x, y, snake_view_diameter)] = tmp_view[IDX2D(snake_view_diameter - 1 - y, x, snake_view_diameter)];
+                }
+            }
+            break;
+        case SNAKEN_DOWN:
+            for (snaken_world_size_t y = 0; y < snake_view_diameter; y++) {
+                for (snaken_world_size_t x = 0; x < snake_view_diameter; x++) {
+                    view[IDX2D(x, y, snake_view_diameter)] = tmp_view[IDX2D(snake_view_diameter - 1 - x, snake_view_diameter - 1 - y, snake_view_diameter)];
+                }
+            }
+            break;
+        case SNAKEN_UP:
+            for (snaken_world_size_t y = 0; y < snake_view_diameter; y++) {
+                for (snaken_world_size_t x = 0; x < snake_view_diameter; x++) {
+                    view[IDX2D(x, y, snake_view_diameter)] = tmp_view[IDX2D(x, y, snake_view_diameter)];
+                }
+            }
+            break;
+        default:
+            break;
+    }
+
+    free(tmp_view);
+
     return SNAKEN_ERROR_NONE;
 }
 
@@ -343,6 +383,14 @@ snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken, snaken_world_size_t
                 break;
             }
         }
+
+        // Make sure the picked location is free from other apples.
+        // for (snaken_world_size_t i = 0; i < snaken->apples_length; i++) {
+        //     if (snaken->apples[i] == apple_location) {
+        //         location_free = SNAKEN_FALSE;
+        //         break;
+        //     }
+        // }
     } while(!location_free);
 
     snaken->apples[index] = apple_location;
