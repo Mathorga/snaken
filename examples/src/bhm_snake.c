@@ -260,6 +260,7 @@ bhm_error_code_t eval_cortex(
       // Only the frontal snake view is fed as input to the network.
       for (bhm_cortex_size_t y = 0; y < input->y1 - input->y0; y++) {
          for (bhm_cortex_size_t x = 0; x < input->x1 - input->x0; x++) {
+            // TODO Generalize linear interpolation: https://gist.github.com/Mathorga/3ec1425af3853a69ecc8f4e5d9d4d523
             float t = ((float) x) * (snaken_view_width - 1) / (input_width - 1);
             int index = (int) t;
             float frac = t - index;
