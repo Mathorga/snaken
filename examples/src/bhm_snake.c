@@ -1,4 +1,4 @@
-// #define GRAPHICS
+#define GRAPHICS
 
 #include <stdio.h>
 #include <snaken/snaken.h>
@@ -176,7 +176,7 @@ bhm_error_code_t eval_cortex(
       0,
       (cortex->width / 2) + (input_width / 2),
       1,
-      BHM_MAX_EXC_VALUE,
+      BHM_MAX_EXC_VALUE * 2,
       BHM_PULSE_MAPPING_FPROP
    );
    if (bhm_error != BHM_ERROR_NONE) {
@@ -254,7 +254,7 @@ bhm_error_code_t eval_cortex(
          return BHM_ERROR_EXTERNAL_CAUSES;
       }
       // printf("SNAKE_DIR: %d\n", snaken->snake_direction);
-      // print_snake_view(snake_view, snaken_view_width);
+      print_snake_view(snake_view, snaken_view_width);
 
       // Feed input to the cortex.
       // Only the frontal snake view is fed as input to the network.
@@ -413,19 +413,20 @@ int evolve(char* src_pop_file_name) {
    // Evolve the population.
    // ##########################################
    for (uint16_t i = 0; i < generations_count; i++) {
-      // Save the population to file before evalutaion.
-      printf("Dumping population %d\n", i);
-      char file_name[100];
-      snprintf(file_name, 100, "out/pop_%d.p2d", i);
-      p2d_to_file(population, file_name);
-
       printf("Evaluation %d\n", i);
       bhm_error = p2d_evaluate(population);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error evaluating the cortices: %d\n", bhm_error);
          return 1;
       }
+
+      // Save the population to file before evalutaion.
+      printf("Dumping population %d\n", i);
+      char file_name[100];
+      snprintf(file_name, 100, "out/pop_%d.p2d", i);
+      p2d_to_file(population, file_name);
       printf("Selection %d\n", i);
+
       bhm_error = p2d_select(population);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error selecting survivors: %d\n", bhm_error);
