@@ -1,4 +1,4 @@
-#define GRAPHICS
+// #define GRAPHICS
 
 #include <stdio.h>
 #include <snaken/snaken.h>
