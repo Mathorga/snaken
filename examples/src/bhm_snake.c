@@ -350,8 +350,8 @@ int evolve(char* src_pop_file_name) {
    const int generations_count = 1e3;
    const int population_size = 1e2;
    const int population_selection_pool_size = 10;
-   const int cortices_width = 12;
-   const int cortices_height = 5;
+   const int cortices_width = 120;
+   const int cortices_height = 50;
    const int cortices_nh_radius = 2;
 
    bhm_error_code_t bhm_error;
