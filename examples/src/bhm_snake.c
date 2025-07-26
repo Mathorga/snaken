@@ -254,7 +254,7 @@ bhm_error_code_t eval_cortex(
          return BHM_ERROR_EXTERNAL_CAUSES;
       }
       // printf("SNAKE_DIR: %d\n", snaken->snake_direction);
-      print_snake_view(snake_view, snaken_view_width);
+      // print_snake_view(snake_view, snaken_view_width);
 
       // Feed input to the cortex.
       // Only the frontal snake view is fed as input to the network.
