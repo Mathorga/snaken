@@ -8,6 +8,10 @@
 #include <snaken/graphics.h>
 #endif
 
+#define POP_SIZE 20
+#define MAX_EVAL_TIME 10000
+#define GENERATIONS_COUNT 100
+
 double lerp(double a, double b, double t) {
    return a + t * (b - a);
 }
@@ -239,7 +243,7 @@ bhm_error_code_t eval_cortex(
    #endif
 
    bhm_ticks_count_t timestep = 0;
-   for (; timestep < 100000; timestep++) {
+   for (; timestep < MAX_EVAL_TIME; timestep++) {
 
       // Make sure the snake is still alive before going on.
       if (!snaken->snake_alive) break;
@@ -347,9 +351,9 @@ bhm_error_code_t eval_cortex(
 }
 
 int evolve(char* src_pop_file_name) {
-   const int generations_count = 1e3;
-   const int population_size = 1e2;
-   const int population_selection_pool_size = 10;
+   const int generations_count = GENERATIONS_COUNT;
+   const int population_size = POP_SIZE;
+   const int population_selection_pool_size = (int) (POP_SIZE / 10);
    const int cortices_width = 6;
    const int cortices_height = 2;
    const int cortices_nh_radius = 2;
@@ -413,7 +417,7 @@ int evolve(char* src_pop_file_name) {
    // Evolve the population.
    // ##########################################
    for (uint16_t i = 0; i < generations_count; i++) {
-      printf("Evaluation %d\n", i);
+      printf("Evaluating generation %d\n", i);
       bhm_error = p2d_evaluate(population);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error evaluating the cortices: %d\n", bhm_error);
@@ -421,11 +425,11 @@ int evolve(char* src_pop_file_name) {
       }
 
       // Save the population to file before evalutaion.
-      printf("Dumping population %d\n", i);
+      printf("Dumping generation %d\n", i);
       char file_name[100];
       snprintf(file_name, 100, "out/pop_%d.p2d", i);
       p2d_to_file(population, file_name);
-      printf("Selection %d\n", i);
+      printf("Selecting generation %d\n", i);
 
       bhm_error = p2d_select(population);
       if (bhm_error != BHM_ERROR_NONE) {
@@ -441,7 +445,7 @@ int evolve(char* src_pop_file_name) {
       // snprintf(file_name, 100, "out/bog_%d.c2d", i);
       // c2d_to_file(&(population->cortices[population->selection_pool[0]]), file_name);
 
-      printf("Crossover %d\n", i);
+      printf("Crossing over generation %d\n", i);
       bhm_error = p2d_crossover(population, BHM_TRUE);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error crossing survivors over: %d\n", bhm_error);
