@@ -1,5 +1,21 @@
+# Default C compiler.
 CCOMP=gcc
+
+# Default archive utility.
 ARC=ar
+
+##################### OS Detection & Configuration #####################
+
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Darwin)
+    include darwin.mk
+else
+    # Default to Linux if not Mac
+    include linux.mk
+endif
+
+##################### Global Settings #####################
 
 STD_CCOMP_FLAGS=-std=c11 -Wall -pedantic -g -fPIC
 CCOMP_FLAGS=$(STD_CCOMP_FLAGS) -fopenmp
@@ -9,14 +25,11 @@ ARC_FLAGS=-rcs
 # Mode flag: if set to "archive", installs snaken as a static library.
 MODE=
 
-STD_LIBS=-lm
+STD_LIBS=-lm $(STD_LIBS_EXTRA)
 
 SRC_DIR=./src
 BLD_DIR=./bld
 BIN_DIR=./bin
-
-SYSTEM_INCLUDE_DIR=
-SYSTEM_LIB_DIR=
 
 OBJECTS=snaken.o utils.o
 
@@ -30,21 +43,7 @@ OBJS=$(patsubst %.o,$(BLD_DIR)/%.o,$^)
 MKDIR=mkdir -p
 RM=rm -rf
 
-# Check what the current operating system is.
-UNAME_S=$(shell uname -s)
-
-# The curren OS is Linux.
-ifeq ($(UNAME_S),Linux)
-	SYSTEM_INCLUDE_DIR=/usr/include
-	SYSTEM_LIB_DIR=/usr/lib
-	STD_LIBS+=-lrt
-endif
-
-# The current OS is MacOS.
-ifeq ($(UNAME_S),Darwin)
-	SYSTEM_INCLUDE_DIR=/usr/local/include
-	SYSTEM_LIB_DIR=/usr/local/lib
-endif
+##################### Targets #####################
 
 all: std
 
