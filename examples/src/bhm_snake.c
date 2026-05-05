@@ -147,6 +147,10 @@ bhm_error_code_t eval_cortex(
       printf("There was an error allocating input %d\n", bhm_error);
       return bhm_error;
    }
+
+   bhm_cortex_counts_t* counts = (bhm_cortex_counts_t*) malloc(sizeof(bhm_cortex_counts_t));
+   counts->ticks_count = 0x00;
+   counts->evols_count = 0x00;
    // ##########################################
    // ##########################################
 
@@ -251,6 +255,12 @@ bhm_error_code_t eval_cortex(
       bhm_cortex2d_t* prev_cortex = timestep % 2 ? tmp_cortex : cortex;
       bhm_cortex2d_t* next_cortex = timestep % 2 ? cortex : tmp_cortex;
 
+      // Defines whether to evolve or not.
+      // evol_step is incremented by 1 to account for edge cases and human readable behavior:
+      // 0x0000 -> 0 + 1 = 1, so the cortex evolves at every tick, meaning that there are no free ticks between evolutions.
+      // 0xFFFF -> 65535 + 1 = 65536, so the cortex never evolves, meaning that there is an infinite amount of ticks between evolutions.
+      bhm_bool_t evolve = (counts->ticks_count % (((bhm_evol_step_t) prev_cortex->evol_step) + 1)) == 0;
+
       // Get snake view as input.
       snaken_error = snaken2d_get_snake_view(snaken, snake_view);
       if (snaken_error != SNAKEN_ERROR_NONE) {
@@ -279,10 +289,22 @@ bhm_error_code_t eval_cortex(
          }
       }
       i2d_mean(input, &mean_input);
-      c2d_feed2d(prev_cortex, input);
+      c2d_feed2d(
+         prev_cortex,
+         input,
+         timestep
+      );
 
       // Tick the cortex.
-      c2d_tick(prev_cortex, next_cortex);
+      c2d_tick(
+         prev_cortex,
+         next_cortex,
+         evolve
+      );
+
+      counts->ticks_count++;
+      // Increment evolutions count.
+      if (evolve) counts->evols_count++;
 
       // Tick the snaken.
       snaken_error = snaken2d_tick(snaken);
