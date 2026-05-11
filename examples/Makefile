@@ -1,10 +1,9 @@
 CCOMP=gcc
 
-STD_CCOMP_FLAGS=-std=c11 -Wall -pedantic -g
-CCOMP_FLAGS=$(STD_CCOMP_FLAGS)
+CCOMP_FLAGS=-std=c11 -Wall -pedantic
 CLINK_FLAGS=-Wall
 
-COMMON_LIBS=-lm -lpthread -ldl -lsnaken
+COMMON_LIBS=-lm -lsnaken
 GRAPHICS_LIBS=-lraylib -lGL -lX11
 BHM_LIBS=-lbehema
 
@@ -14,6 +13,18 @@ ifeq ($(GRAPHICS),1)
 	BHM_SNAKE_LIBS=$(GRAPHICS_LIBS) $(COMMON_LIBS) $(BHM_LIBS)
 else
 	BHM_SNAKE_LIBS=$(COMMON_LIBS) $(BHM_LIBS)
+endif
+
+# Compilation mode:
+# 'release' -> heavy optimizations (-O3) and no debugging.
+# 'debug' -> no extra optimizations and debugging enabled.
+COMPILE_MODE=debug
+
+ifeq ($(COMPILE_MODE), debug)
+    CCOMP_FLAGS+= -g
+endif
+ifeq ($(COMPILE_MODE), release)
+    CCOMP_FLAGS+= -O3
 endif
 
 SRC_DIR=./src
@@ -36,8 +47,13 @@ ifeq ($(UNAME_S),Linux)
 	COMMON_LIBS+=-lrt
 endif
 
-CCOMP_FLAGS+=-I/usr/local/include
-CLINK_FLAGS+=-L/usr/local/lib
+# The current OS is MacOS.
+ifeq ($(UNAME_S),Darwin)
+    CCOMP_FLAGS+=-I/usr/local/include
+
+    # Make sure libraries are found during linking (-L) and embedded in the binary (-rpath).
+    CLINK_FLAGS+=-L/usr/local/lib -Wl,-rpath,/usr/local/lib
+endif
 
 all: clean snake bhm_snake
 

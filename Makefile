@@ -50,19 +50,19 @@ all: std
 # Installs all header files to the default include dir.
 install-headers:
 	@printf "\nInstalling headers...\n\n"
-	sudo $(MKDIR) $(SYSTEM_INCLUDE_DIR)/snaken
-	sudo cp $(SRC_DIR)/*.h $(SYSTEM_INCLUDE_DIR)/snaken
+	sudo $(MKDIR) $(HDR_DST_DIR)/snaken
+	sudo cp $(SRC_DIR)/*.h $(HDR_DST_DIR)/snaken
 
 
 # Installs the generated lib file to the default lib dir.
 install-lib:
-ifneq ($(MODE), archive)
-	@printf "\nInstalling dynamic library...\n\n"
-	sudo cp $(BLD_DIR)/libsnaken.so $(SYSTEM_LIB_DIR)
+ifneq ($(INSTALL_MODE), static)
+	@printf "\nInstalling dynamic library ($(LIB_EXT))...\n\n"
+	sudo cp $(BLD_DIR)/libsnaken$(LIB_EXT) $(LIB_DST_DIR)/
 endif
-ifeq ($(MODE), archive)
+ifeq ($(INSTALL_MODE), static)
 	@printf "\nInstalling static library...\n\n"
-	sudo cp $(BLD_DIR)/libsnaken.a $(SYSTEM_LIB_DIR)
+	sudo cp $(BLD_DIR)/libsnaken.a $(LIB_DST_DIR)/
 endif
 
 
@@ -73,16 +73,16 @@ install: std install-headers install-lib
 
 # Uninstalls any previous installation.
 uninstall: clean
-	sudo $(RM) $(SYSTEM_INCLUDE_DIR)/snaken
-	sudo $(RM) $(SYSTEM_LIB_DIR)/libsnaken.so
-	sudo $(RM) $(SYSTEM_LIB_DIR)/libsnaken.a
+	sudo $(RM) $(HDR_DST_DIR)/snaken
+	sudo $(RM) $(LIB_DST_DIR)/libsnaken.so
+	sudo $(RM) $(LIB_DST_DIR)/libsnaken.a
 	@printf "\nSuccessfully uninstalled.\n\n"
 
 std: create build
 
 # Builds all library files.
 build: $(OBJECTS)
-	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BLD_DIR)/libsnaken.so
+	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BLD_DIR)/libsnaken$(LIB_EXT) $(INSTALL_NAME_FLAGS)
 	$(ARC) $(ARC_FLAGS) $(BLD_DIR)/libsnaken.a $(OBJS)
 	@printf "\nCompiled $@!\n"
 
