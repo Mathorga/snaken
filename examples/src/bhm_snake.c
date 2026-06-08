@@ -446,7 +446,7 @@ int evolve(char* src_pop_file_name) {
          return 1;
       }
 
-      // Save the population to file before evalutaion.
+      // Save the population to file before evaluation.
       printf("Dumping generation %d\n", i);
       char file_name[100];
       snprintf(file_name, 100, "out/pop_%d.p2d", i);
