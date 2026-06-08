@@ -10,7 +10,7 @@
 
 #define POP_SIZE 20
 #define MAX_EVAL_TIME 10000
-#define GENERATIONS_COUNT 100
+#define GENERATIONS_COUNT 10000
 
 double lerp(double a, double b, double t) {
    return a + t * (b - a);
