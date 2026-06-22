@@ -35,6 +35,8 @@ OBJECTS=snaken.o utils.o
 
 ifeq ($(GRAPHICS),1)
 	OBJECTS+=graphics.o
+	CCOMP_FLAGS+=-I$(RAYLIB_DIR)/include
+	CLINK_FLAGS+=$(RAYLIB_DIR)/lib/libraylib.a -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL
 endif
 
 # Adds BLD_DIR to object parameter names.
@@ -90,9 +92,6 @@ build: $(OBJECTS)
 # Builds object files from source.
 %.o: $(SRC_DIR)/%.c
 	$(CCOMP) $(CCOMP_FLAGS) -c $^ -o $(BLD_DIR)/$@
-
-%.o: $(SRC_DIR)/%.cu
-	$(NVCOMP) $(NVCOMP_FLAGS) -c $^ -o $(BLD_DIR)/$@
 
 
 # Creates temporary working directories.

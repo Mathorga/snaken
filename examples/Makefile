@@ -4,8 +4,10 @@ CCOMP_FLAGS=-std=c11 -Wall -pedantic
 CLINK_FLAGS=-Wall
 
 COMMON_LIBS=-lm -lsnaken
-GRAPHICS_LIBS=-lraylib -lGL -lX11
+GRAPHICS_LIBS=
 BHM_LIBS=-lbehema
+
+RAYLIB_DIR=../libs/raylib/raylib-6.0_macos
 
 BHM_SNAKE_LIBS=
 
@@ -59,7 +61,7 @@ all: clean snake bhm_snake
 
 snake: create
 	@printf "\n"
-	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
+	$(CCOMP) $(CCOMP_FLAGS) -I$(RAYLIB_DIR)/include -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
 	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(GRAPHICS_LIBS) $(COMMON_LIBS)
 	@printf "\nCreated $@!\n"
 

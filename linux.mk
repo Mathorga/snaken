@@ -4,6 +4,7 @@ HDR_DST_DIR=/usr/include
 LIB_DST_DIR=/usr/lib
 STD_LIBS_EXTRA=-lrt
 INSTALL_NAME_FLAGS=
+RAYLIB_DIR=./libs/raylib/raylib-6.0_linux_amd64
 
 # Linker flags for C (GCC)
 # We use -shared and set the SONAME

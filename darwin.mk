@@ -4,6 +4,7 @@ HDR_DST_DIR=/usr/local/include
 LIB_DST_DIR=/usr/local/lib
 STD_LIBS_EXTRA=
 INSTALL_NAME_FLAGS=-Wl,-install_name,@rpath/libsnaken.dylib
+RAYLIB_DIR=./libs/raylib/raylib-6.0_macos
 
 # Linker flags for C (GCC)
 # We use -dynamiclib and set the Install Name to @rpath

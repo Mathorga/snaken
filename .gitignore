@@ -41,3 +41,7 @@ bin/*
 
 # Misc
 *.DS_Store
+
+!libs/**/*.a
+!libs/**/*.so
+!libs/**/*.dylib

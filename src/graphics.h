@@ -24,6 +24,6 @@ snaken_error_code_t snaken_graphics_draw(
 
 /// @brief 
 /// @return 
-snaken_error_code_t snaken_graphics_end();
+snaken_error_code_t snaken_graphics_end(void);
 
 #endif
