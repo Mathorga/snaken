@@ -33,12 +33,6 @@ BIN_DIR=./bin
 
 OBJECTS=snaken.o utils.o
 
-ifeq ($(GRAPHICS),1)
-	OBJECTS+=graphics.o
-	CCOMP_FLAGS+=-I$(RAYLIB_DIR)/include
-	CLINK_FLAGS+=$(RAYLIB_DIR)/lib/libraylib.a -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL
-endif
-
 # Adds BLD_DIR to object parameter names.
 OBJS=$(patsubst %.o,$(BLD_DIR)/%.o,$^)
 

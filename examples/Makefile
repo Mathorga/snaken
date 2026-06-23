@@ -7,8 +7,6 @@ COMMON_LIBS=-lm -lsnaken
 GRAPHICS_LIBS=
 BHM_LIBS=-lbehema
 
-RAYLIB_DIR=../libs/raylib/raylib-6.0_macos
-
 BHM_SNAKE_LIBS=
 
 ifeq ($(GRAPHICS),1)
@@ -46,15 +44,30 @@ UNAME_S=$(shell uname -s)
 
 # The curren OS is Linux.
 ifeq ($(UNAME_S),Linux)
-	COMMON_LIBS+=-lrt
+    RAYLIB_DIR=../libs/raylib/raylib-6.0_linux_amd64
+
+    COMMON_LIBS+=-lrt
+
+    # Statically add raylib.
+    CCOMP_FLAGS+=-I$(RAYLIB_DIR)/include
+    CLINK_FLAGS+=$(RAYLIB_DIR)/lib/libraylib.a
 endif
 
 # The current OS is MacOS.
 ifeq ($(UNAME_S),Darwin)
+    RAYLIB_DIR=../libs/raylib/raylib-6.0_macos
+
     CCOMP_FLAGS+=-I/usr/local/include
+
+    # Add raylib headers.
+    CCOMP_FLAGS+=-I$(RAYLIB_DIR)/include
 
     # Make sure libraries are found during linking (-L) and embedded in the binary (-rpath).
     CLINK_FLAGS+=-L/usr/local/lib -Wl,-rpath,/usr/local/lib
+
+    # Statically add raylib.
+    CLINK_FLAGS+=$(RAYLIB_DIR)/lib/libraylib.a
+    CLINK_FLAGS+=-framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL
 endif
 
 all: clean snake bhm_snake
