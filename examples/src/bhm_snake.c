@@ -377,24 +377,24 @@ int evolve(
    int pop_size,
    int max_eval_time,
    int gens_count,
-   char* src_pop_file_name
+   char* pop_file_name
 ) {
-   const int population_selection_pool_size = (int) (POP_SIZE / 10);
-   const int cortices_width = 6;
-   const int cortices_height = 2;
-   const int cortices_nh_radius = 2;
-
    bhm_error_code_t bhm_error;
    bhm_population2d_t* population;
 
-   if (src_pop_file_name != NULL) {
+   if (pop_file_name != NULL) {
       // ##########################################
       // Read population from file.
       // ##########################################
 
+      printf(
+         "Evolving population from file %s\n",
+         pop_file_name
+      );
+
       // When reading a population from file, the population must be allocated first, since p2d_from_file does not manage allocation by itself.
       population = (bhm_population2d_t *) malloc(sizeof(bhm_cortex2d_t));
-      p2d_from_file(population, src_pop_file_name);
+      p2d_from_file(population, pop_file_name);
       p2d_set_eval_function(population, &eval_cortex);
       // p2d_set_eval_function(population, &dummy_eval);
 
@@ -411,6 +411,19 @@ int evolve(
       // ##########################################
       // Init cortices population.
       // ##########################################
+
+      printf("Evolving population with params:\n");
+      printf(
+         "pop_size: %d\nmax_eval_time: %d\ngens_count: %d\n",
+         pop_size,
+         max_eval_time,
+         gens_count
+      );
+
+      const int population_selection_pool_size = (int) (POP_SIZE / 10);
+      const int cortices_width = 6;
+      const int cortices_height = 2;
+      const int cortices_nh_radius = 2;
 
       bhm_error = p2d_init(
          &population,
@@ -439,6 +452,21 @@ int evolve(
       // ##########################################
    }
 
+   // Start real-time plotting.
+   FILE* gnuplotPipe = popen("gnuplot -persistent", "w");
+
+   if (gnuplotPipe == NULL) {
+      printf("Could not open pipe to gnuplot\n");
+      return 1;
+   }
+
+   // Initial gnuplot configuration.
+   fprintf(gnuplotPipe, "set title 'Best cortex fitness'\n");
+   fprintf(gnuplotPipe, "set yrange [2000:10000]\n");
+   fprintf(gnuplotPipe, "set xrange [0:%d]\n", gens_count);
+   double x_plot_data[gens_count];
+   double y_plot_data[gens_count];
+
    // ##########################################
    // Evolve the population.
    // ##########################################
@@ -459,9 +487,32 @@ int evolve(
          printf("There was an error selecting survivors: %d\n", bhm_error);
          return 1;
       }
-      for (bhm_population_size_t i = 0; i < population->selection_pool_size; i++) {
-         printf("SELECTION_POOL %d, fitness: %d\n", population->selection_pool[i], population->cortices_fitness[population->selection_pool[i]]);
+
+      x_plot_data[i] = i;
+      y_plot_data[i] = population->cortices_fitness[population->selection_pool[0]];
+
+      if (i % 100 == 0) {
+         // Tell gnuplot to plot data from standard input ('-').
+         fprintf(gnuplotPipe, "plot '-' with lines title 'Signal'\n");
+
+         // Send the raw X/Y data directly through the pipe.
+         for (int j = 0; j <= i; j++) {
+            fprintf(gnuplotPipe, "%f %f\n", x_plot_data[j], y_plot_data[j]);
+         }
+
+         // Send the 'e' character to tell gnuplot the data block is finished.
+         fprintf(gnuplotPipe, "e\n");
+         
+         // Flush the pipe to ensure the commands are executed immediately.
+         fflush(gnuplotPipe);
       }
+
+      printf(
+         "Best of generation %d: cortex %d with fitness %d\n",
+         i,
+         population->selection_pool[0],
+         population->cortices_fitness[population->selection_pool[0]]
+      );
 
       // Save the best cortex to file before the population is reset by crossover.
       // char file_name[100];
@@ -481,6 +532,7 @@ int evolve(
    // ##########################################
    // Cleanup.
    // ##########################################
+   pclose(gnuplotPipe);
    p2d_destroy(population);
    // ##########################################
    // ##########################################
@@ -488,11 +540,11 @@ int evolve(
    return 0;
 }
 
- struct option evolve_options[] = {
-   {"pop_size", optional_argument, 0, 's'},
-   {"max_eval_time", optional_argument, 0, 't'},
-   {"gens_count", optional_argument, 0, 'g'},
-   {"pop_file_path", optional_argument, 0, 'f'},
+struct option evolve_options[] = {
+   {"pop_size", required_argument, 0, 's'},
+   {"max_eval_time", required_argument, 0, 't'},
+   {"gens_count", required_argument, 0, 'g'},
+   {"pop_file_path", required_argument, 0, 'f'},
    {0, no_argument, 0, 0}
 };
 
@@ -503,11 +555,13 @@ int main(int argc, char** argv) {
    // Input handling.
    // ##########################################
 
+   // Make sure a command was provided.
    if (argc < 2) {
       printf("No command provided. Type \"bhm_snake help\" for a list of all available commands\n");
       return 1;
    }
 
+   // Parse command.
    if (strcmp(argv[1], "evolve") == 0) {
       int pop_size = POP_SIZE;
       int max_eval_time = MAX_EVAL_TIME;
@@ -567,72 +621,3 @@ int main(int argc, char** argv) {
 
    return 0;
 }
-
-// int main(int argc, char *argv[]) {
-//     int opt;
-    
-//     // Define the expected named arguments
-//     // { "name", has_arg, flag, val }
-//     struct option long_options[] = {
-//         {"someparamname",  required_argument, 0,  's' },
-//         {"otherparamname", required_argument, 0,  'o' },
-//         {0,                0,                 0,   0  } // Required terminator
-//     };
-
-//     int option_index = 0;
-
-//     // Loop through all arguments
-//     while ((opt = getopt_long(argc, argv, "s:o:", long_options, &option_index)) != -1) {
-//         switch (opt) {
-//             case 's':
-//                 printf("Parsed --someparamname with value: %s\n", optarg);
-//                 break;
-//             case 'o':
-//                 printf("Parsed --otherparamname with value: %s\n", optarg);
-//                 break;
-//             case '?':
-//                 // getopt_long automatically prints an error message for unknown options
-//                 printf("Unknown option or missing value.\n");
-//                 return 1;
-//             default:
-//                 abort();
-//         }
-//     }
-
-//     return 0;
-// }
-
-
-// int main(int argc, char *argv[]) {
-//     // Start at 1 because argv[0] is the name of your program
-//     for (int i = 1; i < argc; i++) {
-        
-//         // Check for --someparamname
-//         if (strcmp(argv[i], "--someparamname") == 0) {
-//             // Make sure there is another argument after this one for the value
-//             if (i + 1 < argc) {
-//                 printf("Parsed --someparamname with value: %s\n", argv[i + 1]);
-//                 i++; // Skip the value in the next loop iteration
-//             } else {
-//                 printf("Error: --someparamname requires a value.\n");
-//                 return 1;
-//             }
-//         } 
-//         // Check for --otherparamname
-//         else if (strcmp(argv[i], "--otherparamname") == 0) {
-//             if (i + 1 < argc) {
-//                 printf("Parsed --otherparamname with value: %s\n", argv[i + 1]);
-//                 i++; 
-//             } else {
-//                 printf("Error: --otherparamname requires a value.\n");
-//                 return 1;
-//             }
-//         } 
-//         else {
-//             printf("Unknown argument: %s\n", argv[i]);
-//             return 1;
-//         }
-//     }
-
-//     return 0;
-// }
