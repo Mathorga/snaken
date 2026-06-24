@@ -1,6 +1,7 @@
 // #define GRAPHICS
 
 #include <stdio.h>
+#include <getopt.h>
 #include <snaken/snaken.h>
 #include <behema/behema.h>
 
@@ -372,9 +373,12 @@ bhm_error_code_t eval_cortex(
    return BHM_ERROR_NONE;
 }
 
-int evolve(char* src_pop_file_name) {
-   const int generations_count = GENERATIONS_COUNT;
-   const int population_size = POP_SIZE;
+int evolve(
+   int pop_size,
+   int max_eval_time,
+   int gens_count,
+   char* src_pop_file_name
+) {
    const int population_selection_pool_size = (int) (POP_SIZE / 10);
    const int cortices_width = 6;
    const int cortices_height = 2;
@@ -410,7 +414,7 @@ int evolve(char* src_pop_file_name) {
 
       bhm_error = p2d_init(
          &population,
-         population_size,
+         pop_size,
          population_selection_pool_size,
          0x00FFFFFF,
          &eval_cortex
@@ -438,8 +442,7 @@ int evolve(char* src_pop_file_name) {
    // ##########################################
    // Evolve the population.
    // ##########################################
-   for (uint16_t i = 0; i < generations_count; i++) {
-      printf("Evaluating generation %d\n", i);
+   for (uint16_t i = 0; i < gens_count; i++) {
       bhm_error = p2d_evaluate(population);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error evaluating the cortices: %d\n", bhm_error);
@@ -447,11 +450,9 @@ int evolve(char* src_pop_file_name) {
       }
 
       // Save the population to file before evaluation.
-      printf("Dumping generation %d\n", i);
       char file_name[100];
       snprintf(file_name, 100, "out/pop_%d.p2d", i);
       p2d_to_file(population, file_name);
-      printf("Selecting generation %d\n", i);
 
       bhm_error = p2d_select(population);
       if (bhm_error != BHM_ERROR_NONE) {
@@ -467,7 +468,6 @@ int evolve(char* src_pop_file_name) {
       // snprintf(file_name, 100, "out/bog_%d.c2d", i);
       // c2d_to_file(&(population->cortices[population->selection_pool[0]]), file_name);
 
-      printf("Crossing over generation %d\n", i);
       bhm_error = p2d_crossover(population, BHM_TRUE);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error crossing survivors over: %d\n", bhm_error);
@@ -488,6 +488,14 @@ int evolve(char* src_pop_file_name) {
    return 0;
 }
 
+ struct option evolve_options[] = {
+   {"pop_size", optional_argument, 0, 's'},
+   {"max_eval_time", optional_argument, 0, 't'},
+   {"gens_count", optional_argument, 0, 'g'},
+   {"pop_file_path", optional_argument, 0, 'f'},
+   {0, no_argument, 0, 0}
+};
+
 int main(int argc, char** argv) {
    srand(time(NULL));
 
@@ -500,26 +508,131 @@ int main(int argc, char** argv) {
       return 1;
    }
 
-   if (argc >= 2) {
-      if (strcmp(argv[1], "evolve") == 0) {
-         // Evolve.
-         return evolve(argc > 2 ? argv[2] : NULL);
+   if (strcmp(argv[1], "evolve") == 0) {
+      int pop_size = POP_SIZE;
+      int max_eval_time = MAX_EVAL_TIME;
+      int gens_count = GENERATIONS_COUNT;
+      char* pop_file_path = NULL;
+
+      int opt;
+      int option_index = 0;
+
+      // Loop through all arguments
+      while ((opt = getopt_long(argc - 1, argv + 1, "s:o:", evolve_options, &option_index)) != -1) {
+         switch (opt) {
+            case 's':
+               pop_size = atoi(optarg);
+               break;
+            case 't':
+               max_eval_time = atoi(optarg);
+               break;
+            case 'g':
+               gens_count = atoi(optarg);
+               break;
+            case 'f':
+               pop_file_path = optarg;
+               break;
+            case '?':
+               printf("Unknown option or missing value.\n");
+               return 1;
+            default:
+               abort();
+         }
       }
 
-      if (strcmp(argv[1], "help") == 0) {
-         // TODO.
-         printf("Help requested\n");
-         return 0;
-      }
+      printf("Running evolve with pop_size %d, max_eval_time %d, gens_count %d, pop_file_path %s\n", pop_size, max_eval_time, gens_count, pop_file_path);
 
-      if (strcmp(argv[1], "run") == 0) {
-         // TODO.
-         printf("Unimplemented\n");
-         return 0;
-      }
+      // Evolve.
+      return evolve(
+         pop_size,
+         max_eval_time,
+         gens_count,
+         pop_file_path
+      );
+   }
+
+   if (strcmp(argv[1], "help") == 0) {
+      // TODO.
+      printf("Help requested\n");
+      return 0;
+   }
+
+   if (strcmp(argv[1], "run") == 0) {
+      // TODO.
+      printf("Unimplemented\n");
+      return 0;
    }
    // ##########################################
    // ##########################################
 
    return 0;
 }
+
+// int main(int argc, char *argv[]) {
+//     int opt;
+    
+//     // Define the expected named arguments
+//     // { "name", has_arg, flag, val }
+//     struct option long_options[] = {
+//         {"someparamname",  required_argument, 0,  's' },
+//         {"otherparamname", required_argument, 0,  'o' },
+//         {0,                0,                 0,   0  } // Required terminator
+//     };
+
+//     int option_index = 0;
+
+//     // Loop through all arguments
+//     while ((opt = getopt_long(argc, argv, "s:o:", long_options, &option_index)) != -1) {
+//         switch (opt) {
+//             case 's':
+//                 printf("Parsed --someparamname with value: %s\n", optarg);
+//                 break;
+//             case 'o':
+//                 printf("Parsed --otherparamname with value: %s\n", optarg);
+//                 break;
+//             case '?':
+//                 // getopt_long automatically prints an error message for unknown options
+//                 printf("Unknown option or missing value.\n");
+//                 return 1;
+//             default:
+//                 abort();
+//         }
+//     }
+
+//     return 0;
+// }
+
+
+// int main(int argc, char *argv[]) {
+//     // Start at 1 because argv[0] is the name of your program
+//     for (int i = 1; i < argc; i++) {
+        
+//         // Check for --someparamname
+//         if (strcmp(argv[i], "--someparamname") == 0) {
+//             // Make sure there is another argument after this one for the value
+//             if (i + 1 < argc) {
+//                 printf("Parsed --someparamname with value: %s\n", argv[i + 1]);
+//                 i++; // Skip the value in the next loop iteration
+//             } else {
+//                 printf("Error: --someparamname requires a value.\n");
+//                 return 1;
+//             }
+//         } 
+//         // Check for --otherparamname
+//         else if (strcmp(argv[i], "--otherparamname") == 0) {
+//             if (i + 1 < argc) {
+//                 printf("Parsed --otherparamname with value: %s\n", argv[i + 1]);
+//                 i++; 
+//             } else {
+//                 printf("Error: --otherparamname requires a value.\n");
+//                 return 1;
+//             }
+//         } 
+//         else {
+//             printf("Unknown argument: %s\n", argv[i]);
+//             return 1;
+//         }
+//     }
+
+//     return 0;
+// }
