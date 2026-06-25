@@ -1,6 +1,5 @@
 #include "snaken.h"
 
-
 // ##########################################
 // Initialization functions.
 // ##########################################
@@ -41,6 +40,8 @@ snaken_error_code_t snaken2d_init(
 
     // Allocate snake body.
     (*snaken)->snake_length = SNAKEN_STARTING_SNAKE_LENGTH;
+    // The head starts out.
+    (*snaken)->snake_out_length = 1;
     (*snaken)->snake_body = (snaken_world_size_t*) malloc((*snaken)->snake_length * sizeof(snaken_world_size_t));
     if ((*snaken)->snake_body == NULL) {
         return SNAKEN_ERROR_FAILED_ALLOC;
@@ -59,7 +60,7 @@ snaken_error_code_t snaken2d_init(
     (*snaken)->snake_stamina = SNAKEN_DEFAULT_SNAKE_STAMINA;
     (*snaken)->snake_stamina_step = 0;
     (*snaken)->snake_direction = SNAKEN_STARTING_SNAKE_DIR;
-    (*snaken)->self_intersection = SNAKEN_FALSE;
+    (*snaken)->self_intersects = SNAKEN_TRUE;
     (*snaken)->snake_alive = SNAKEN_TRUE;
     (*snaken)->snake_view_radius = SNAKEN_DEFAULT_SNAKE_VIEW_RADIUS;
 
@@ -127,24 +128,24 @@ snaken_error_code_t snaken2d_tick(snaken2d_t* snaken) {
 
     // 5: Check for hunger.
     snaken->snake_stamina_step++;
-    if (snaken->snake_stamina_step > snaken->snake_stamina) {
-        // Reset hunger.
-        snaken->snake_stamina_step = 0;
+    if (snaken->snake_stamina_step <= snaken->snake_stamina) return SNAKEN_ERROR_NONE;
 
-        // Decrease the snake length.
-        snaken->snake_length--;
-        if (snaken->snake_length <= 0) {
-            // Let the snake die of hunger.
-            // Calling free instead of letting realloc free the snake body ensures memory is actually freed,
-            // since realloc's behavior with size 0 is implementation-specific, and therefore unpredictable.
-            free(snaken->snake_body);
-            snaken->snake_alive = SNAKEN_FALSE;
-        } else {
-            // Chop the snake body off by one.
-            snaken->snake_body = (snaken_world_size_t*) realloc(snaken->snake_body, snaken->snake_length * sizeof(snaken_world_size_t));
-            if (snaken->snake_length > 0 && snaken->snake_body == NULL) {
-                return SNAKEN_ERROR_FAILED_ALLOC;
-            }
+    // Reset hunger.
+    snaken->snake_stamina_step = 0;
+
+    // Decrease the snake length.
+    snaken->snake_length--;
+    if (snaken->snake_length <= 0) {
+        // Let the snake die of hunger.
+        // Calling free instead of letting realloc free the snake body ensures memory is actually freed,
+        // since realloc's behavior with size 0 is implementation-specific, and therefore unpredictable.
+        free(snaken->snake_body);
+        snaken->snake_alive = SNAKEN_FALSE;
+    } else {
+        // Chop the snake body off by one.
+        snaken->snake_body = (snaken_world_size_t*) realloc(snaken->snake_body, snaken->snake_length * sizeof(snaken_world_size_t));
+        if (snaken->snake_length > 0 && snaken->snake_body == NULL) {
+            return SNAKEN_ERROR_FAILED_ALLOC;
         }
     }
 
@@ -345,6 +346,11 @@ snaken_error_code_t snaken2d_turn_right(snaken2d_t* snaken) {
 
     return SNAKEN_ERROR_NONE;
 }
+snaken_error_code_t snaken2d_set_self_intersect(snaken2d_t* snaken, snaken_bool_t val) {
+    snaken->self_intersects = val;
+
+    return SNAKEN_ERROR_NONE;
+}
 
 snaken_error_code_t snaken2d_set_snake_speed(snaken2d_t* snaken, snaken_snake_speed_t speed) {
     snaken->snake_speed = speed;
@@ -505,6 +511,9 @@ snaken_error_code_t snaken2d_move_snake(snaken2d_t* snaken) {
         section_location = old_location;
     }
 
+    // Get out of the starting hole a bit.
+    if (snaken->snake_out_length < snaken->snake_length) snaken->snake_out_length++;
+
     return SNAKEN_ERROR_NONE;
 }
 
@@ -560,13 +569,15 @@ snaken_error_code_t snaken2d_eat_body(snaken2d_t* snaken, snaken_bool_t* result)
     (*result) = SNAKEN_FALSE;
 
     // Make sure no check is performed if so specified.
-    if (!snaken->self_intersection) return SNAKEN_ERROR_NONE;
-
+    if (snaken->self_intersects == SNAKEN_TRUE) return SNAKEN_ERROR_NONE;
+    
     // Start from 1 since the first element is actually the snake head.
-    for (snaken_world_size_t i = 1; i < snaken->snake_length; i++) {
-        // The snake head can be at most on one wall, so leave as soon as one is found.
+    for (snaken_world_size_t i = 1; i < snaken->snake_out_length; i++) {
+
+        // The snake head can be at most on one of its body sections, so leave as soon as one is found.
         if (snaken->snake_body[0] == snaken->snake_body[i]) {
-            // A wall was found, so hit it and let the snake die:
+
+            // A body section was found, so eat it and let the snake die:
             (*result) = SNAKEN_TRUE;
 
             // Let the snake die.

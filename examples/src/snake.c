@@ -47,6 +47,12 @@ int main(void) {
         return 1;
     }
 
+    error = snaken2d_set_self_intersect(snaken, SNAKEN_FALSE);
+    if (error != SNAKEN_ERROR_NONE) {
+       printf("There was an error updating intersaction rules: %d\n", error);
+       return 1;
+    }
+
     error = snaken2d_set_snake_speed(snaken, 0xF5);
     if (error != SNAKEN_ERROR_NONE) {
        printf("There was an error updating the snake speed: %d\n", error);

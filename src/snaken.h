@@ -131,6 +131,10 @@ typedef struct {
     // Snake length.
     snaken_world_size_t snake_length;
 
+    // Length of the snake outside the starting hole.
+    // This is only used during world startup in order not to consider the snake eating itself right away.
+    snaken_world_size_t snake_out_length;
+
     // Snake body.
     snaken_world_size_t* snake_body;
 
@@ -157,8 +161,8 @@ typedef struct {
     // The current snake direction.
     snaken_dir_t snake_direction;
 
-    // Whether self intersection is enabled or not.
-    snaken_bool_t self_intersection;
+    // Whether self intersection is enabled (can self intersect without dying) or not.
+    snaken_bool_t self_intersects;
 
     // Tells whether the snake is currently alive or not.
     snaken_bool_t snake_alive;
@@ -269,6 +273,12 @@ snaken_error_code_t snaken2d_turn_left(snaken2d_t* snaken);
 /// @param snaken The snaken to apply the turn to.
 /// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
 snaken_error_code_t snaken2d_turn_right(snaken2d_t* snaken);
+
+/// @brief Sets whether the snake can self-intersect without dying or not.
+/// @param snaken The snaken to apply changes to.
+/// @param val The value to apply.
+/// @return The code for the occurred error, [SNAKEN_ERROR_NONE] if none.
+snaken_error_code_t snaken2d_set_self_intersect(snaken2d_t* snaken, snaken_bool_t val);
 
 /// @brief Sets the snake speed in the provided snaken.
 /// @param snaken The snaken to apply the new speed to.

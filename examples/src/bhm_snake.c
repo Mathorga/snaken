@@ -1,4 +1,5 @@
 // #define GRAPHICS
+#define PLOT
 
 #include <stdio.h>
 #include <getopt.h>
@@ -96,6 +97,12 @@ snaken_error_code_t create_snaken(
       return snaken_error;
    }
 
+   snaken_error = snaken2d_set_self_intersect(*snaken, SNAKEN_FALSE);
+   if (snaken_error != SNAKEN_ERROR_NONE) {
+      printf("There was an error updating intersection rules: %d\n", snaken_error);
+      return snaken_error;
+   }
+
    snaken_error = snaken2d_set_snake_speed(*snaken, 0xF5);
    if (snaken_error != SNAKEN_ERROR_NONE) {
       printf("There was an error updating the snake speed: %d\n", snaken_error);
@@ -136,12 +143,12 @@ bhm_error_code_t eval_cortex(
    bhm_cortex2d_t* tmp_cortex;
    bhm_error = c2d_create(&tmp_cortex, cortex->width, cortex->height, cortex->nh_radius);
    if (bhm_error != BHM_ERROR_NONE) {
-      printf("There was an error allocating input %d\n", bhm_error);
+      printf("There was an error creating cortex %d\n", bhm_error);
       return bhm_error;
    }
    bhm_error = c2d_copy(tmp_cortex, cortex);
    if (bhm_error != BHM_ERROR_NONE) {
-      printf("There was an error allocating input %d\n", bhm_error);
+      printf("There was an error copying cortex %d\n", bhm_error);
       return bhm_error;
    }
 
@@ -239,7 +246,6 @@ bhm_error_code_t eval_cortex(
    // ##########################################
 
    #ifdef GRAPHICS
-
    int window_width = world_width * 20;
    int window_height = world_height * 20;
 
@@ -249,10 +255,14 @@ bhm_error_code_t eval_cortex(
       "BHM SNAKE"
    );
 
-   SetTargetFPS(240);
+   SetTargetFPS(960);
    #endif
 
    bhm_ticks_count_t timestep = 0;
+
+   // uint64_t t0 = nanos();
+   // uint64_t t1 = t0;
+
    for (; timestep < MAX_EVAL_TIME; timestep++) {
 
       // Make sure the snake is still alive before going on.
@@ -273,6 +283,11 @@ bhm_error_code_t eval_cortex(
          printf("There was an error retrieving the snake view: %d\n", snaken_error);
          return BHM_ERROR_EXTERNAL_CAUSES;
       }
+
+      // t1 = nanos();
+      // printf("Got snake view in %llu ns\n", t1 - t0);
+      // t0 = nanos();
+
       // printf("SNAKE_DIR: %d\n", snaken->snake_direction);
       // print_snake_view(snake_view, snaken_view_width);
 
@@ -301,12 +316,20 @@ bhm_error_code_t eval_cortex(
          timestep
       );
 
+      // t1 = nanos();
+      // printf("Fed cortex in %llu ns\n", t1 - t0);
+      // t0 = nanos();
+
       // Tick the cortex.
       c2d_tick(
          prev_cortex,
          next_cortex,
          evolve
       );
+
+      // t1 = nanos();
+      // printf("Ticked cortex in %llu ns\n", t1 - t0);
+      // t0 = nanos();
 
       counts->ticks_count++;
       // Increment evolutions count.
@@ -319,11 +342,24 @@ bhm_error_code_t eval_cortex(
          return BHM_ERROR_EXTERNAL_CAUSES;
       }
 
+      // t1 = nanos();
+      // printf("Ticked snaken in %llu ns\n", t1 - t0);
+      // t0 = nanos();
+
       // Read cortex output.
       c2d_read2d(next_cortex, left_output);
       c2d_read2d(next_cortex, right_output);
+
+      // t1 = nanos();
+      // printf("Read output in %llu ns\n", t1 - t0);
+      // t0 = nanos();
+
       o2d_mean(left_output, &mean_left_output);
       o2d_mean(right_output, &mean_right_output);
+
+      // t1 = nanos();
+      // printf("Meaned output in %llu ns\n", t1 - t0);
+      // t0 = nanos();
 
       // Use cortex output to control the snake.
       if (mean_left_output > mean_right_output) {
@@ -332,10 +368,16 @@ bhm_error_code_t eval_cortex(
          snaken2d_turn_right(snaken);
       }
 
+      // t1 = nanos();
+      // printf("Applied turning in %llu ns\n\n", t1 - t0);
+      // t0 = nanos();
+
       #ifdef GRAPHICS
       draw_snaken(snaken, window_width, window_height);
       #endif
    }
+
+   // printf("Evaluated cortex in %llu ms\n", millis() - t0);
 
    #ifdef GRAPHICS
    CloseWindow();
@@ -434,7 +476,7 @@ int evolve(
          &population,
          pop_size,
          population_selection_pool_size,
-         0x00FFFFFF,
+         0x5FFFFFFF,
          &eval_cortex
          // &dummy_eval
       );
@@ -457,30 +499,34 @@ int evolve(
       // ##########################################
    }
 
+   #ifdef PLOT
    // Start real-time plotting.
    FILE* gnuplotPipe = popen("gnuplot -persistent", "w");
-
+   
    if (gnuplotPipe == NULL) {
       printf("Could not open pipe to gnuplot\n");
       return 1;
    }
-
+   
    // Initial gnuplot configuration.
    fprintf(gnuplotPipe, "set title 'Best cortex fitness'\n");
    fprintf(gnuplotPipe, "set yrange [2000:10000]\n");
    fprintf(gnuplotPipe, "set xrange [0:%d]\n", gens_count);
    double x_plot_data[gens_count];
    double y_plot_data[gens_count];
-
+   #endif
+   
    // ##########################################
    // Evolve the population.
    // ##########################################
    for (uint16_t i = 0; i < gens_count; i++) {
+      uint64_t t0 = millis();
       bhm_error = p2d_evaluate(population);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error evaluating the cortices: %d\n", bhm_error);
          return 1;
       }
+      printf("Evaluated generation %d in %llu ms\n", i, millis() - t0);
 
       // Save the population to file before evaluation.
       char file_name[100];
@@ -492,12 +538,12 @@ int evolve(
          printf("There was an error selecting survivors: %d\n", bhm_error);
          return 1;
       }
-
+      #ifdef PLOT
       x_plot_data[i] = i;
       y_plot_data[i] = population->cortices_fitness[population->selection_pool[0]];
 
       // Plot data.
-      if (i % 100 == 0) {
+      if (i % 10 == 0) {
          // Tell gnuplot to plot data from standard input ('-').
          fprintf(gnuplotPipe, "plot '-' with lines title 'Signal'\n");
 
@@ -512,6 +558,7 @@ int evolve(
          // Flush the pipe to ensure the commands are executed immediately.
          fflush(gnuplotPipe);
       }
+      #endif
 
       printf(
          "Best of generation %d: cortex %d with fitness %d\n",
@@ -519,6 +566,9 @@ int evolve(
          population->selection_pool[0],
          population->cortices_fitness[population->selection_pool[0]]
       );
+      char cortex_string[100];
+      c2d_to_string(&(population->cortices[population->selection_pool[0]]), cortex_string);
+      printf("%s", cortex_string);
 
       // Save the best cortex to file before the population is reset by crossover.
       // char file_name[100];
@@ -538,7 +588,9 @@ int evolve(
    // ##########################################
    // Cleanup.
    // ##########################################
+   #ifdef PLOT
    pclose(gnuplotPipe);
+   #endif
    p2d_destroy(population);
    // ##########################################
    // ##########################################
