@@ -1,5 +1,5 @@
-// #define GRAPHICS
-#define PLOT
+#define GRAPHICS
+// #define PLOT
 
 #include <stdio.h>
 #include <getopt.h>
@@ -196,6 +196,7 @@ bhm_error_code_t eval_cortex(
       BHM_PULSE_MAPPING_FPROP
    );
    if (bhm_error != BHM_ERROR_NONE) {
+      printf("i2d x0 %d x1 %d\n", (cortex->width / 2) - (input_width / 2), (cortex->width / 2) + (input_width / 2));
       printf("There was an error allocating input %d\n", bhm_error);
       return bhm_error;
    }
@@ -468,8 +469,8 @@ int evolve(
       );
 
       const int population_selection_pool_size = (int) (POP_SIZE / 10);
-      const int cortices_width = 6;
-      const int cortices_height = 2;
+      const int cortices_width = 12;
+      const int cortices_height = 4;
       const int cortices_nh_radius = 2;
 
       bhm_error = p2d_init(
