@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <snaken/snaken.h>
+#include <snaken/utils.h>
 
 void init_window(
     int window_width,

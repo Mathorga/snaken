@@ -6,16 +6,12 @@
 #include <behema/behema.h>
 
 #ifdef GRAPHICS
-#include <snaken/graphics.h>
+#include "draw_snaken.h"
 #endif
 
 #define POP_SIZE 20
 #define MAX_EVAL_TIME 10000
 #define GENERATIONS_COUNT 10000
-
-double lerp(double a, double b, double t) {
-   return a + t * (b - a);
-}
 
 int clamp(int d, int min, int max) {
    const int t = d < min ? min : d;
@@ -112,7 +108,7 @@ snaken_error_code_t create_snaken(
       return snaken_error;
    }
 
-   snaken_error = snaken2d_set_apples_count(*snaken, 0xAF);
+   snaken_error = snaken2d_set_apples_count(*snaken, 0x0F);
    if (snaken_error != SNAKEN_ERROR_NONE) {
       printf("There was an error setting the amount of apples: %d\n", snaken_error);
       return snaken_error;
@@ -162,7 +158,11 @@ bhm_error_code_t eval_cortex(
    snaken_error_code_t snaken_error;
 
    snaken2d_t* snaken = NULL;
-   snaken_error = create_snaken(&snaken, world_width, world_height);
+   snaken_error = create_snaken(
+      &snaken,
+      world_width,
+      world_height
+   );
    if (snaken_error != SNAKEN_ERROR_NONE) {
       printf("There was an error creating the snaken: %d\n", snaken_error);
       return BHM_ERROR_EXTERNAL_CAUSES;
@@ -239,12 +239,17 @@ bhm_error_code_t eval_cortex(
    // ##########################################
 
    #ifdef GRAPHICS
-   snaken_graphics_begin(
-      world_width * 20,
-      world_height * 20
+
+   int window_width = world_width * 20;
+   int window_height = world_height * 20;
+
+   InitWindow(
+      window_width,
+      window_height,
+      "BHM SNAKE"
    );
 
-   SetTargetFPS(120);
+   SetTargetFPS(240);
    #endif
 
    bhm_ticks_count_t timestep = 0;
@@ -328,12 +333,12 @@ bhm_error_code_t eval_cortex(
       }
 
       #ifdef GRAPHICS
-      snaken_graphics_draw(snaken);
+      draw_snaken(snaken, window_width, window_height);
       #endif
    }
 
    #ifdef GRAPHICS
-   snaken_graphics_end();
+   CloseWindow();
    #endif
 
    // ##########################################
@@ -491,6 +496,7 @@ int evolve(
       x_plot_data[i] = i;
       y_plot_data[i] = population->cortices_fitness[population->selection_pool[0]];
 
+      // Plot data.
       if (i % 100 == 0) {
          // Tell gnuplot to plot data from standard input ('-').
          fprintf(gnuplotPipe, "plot '-' with lines title 'Signal'\n");
