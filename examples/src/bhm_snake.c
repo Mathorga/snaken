@@ -1,5 +1,5 @@
-#define GRAPHICS
-// #define PLOT
+// #define GRAPHICS
+#define PLOT
 
 #include <stdio.h>
 #include <getopt.h>
@@ -8,11 +8,25 @@
 
 #ifdef GRAPHICS
 #include "draw_snaken.h"
+#include "draw_cortex.h"
 #endif
 
 #define POP_SIZE 20
 #define MAX_EVAL_TIME 10000
 #define GENERATIONS_COUNT 10000
+
+#define WORLD_WIDTH 30
+#define WORLD_HEIGHT 30
+
+#define CORTICES_WIDTH 20
+#define CORTICES_HEIGHT 4
+#define CORTICES_NH_RADIUS 2
+#define POP_MUT_CHANCE 0x0FFFFFFFU
+
+#ifdef GRAPHICS
+#define WINDOW_WIDTH WORLD_WIDTH * 20
+#define WINDOW_HEIGHT WORLD_HEIGHT * 20
+#endif
 
 int clamp(int d, int min, int max) {
    const int t = d < min ? min : d;
@@ -79,6 +93,8 @@ snaken_error_code_t create_snaken(
 ) {
    snaken_error_code_t snaken_error;
 
+   srand(2);
+
    snaken_error = snaken2d_init(snaken, world_width, world_height);
    if (snaken_error != SNAKEN_ERROR_NONE) {
       printf("There was an error initializing the snaken: %d\n", snaken_error);
@@ -132,9 +148,6 @@ bhm_error_code_t eval_cortex(
    bhm_cortex2d_t* cortex,
    bhm_cortex_fitness_t* fitness
 ) {
-   const int world_width = 30;
-   const int world_height = 30;
-
    // ##########################################
    // Init cortices.
    // ##########################################
@@ -167,8 +180,8 @@ bhm_error_code_t eval_cortex(
    snaken2d_t* snaken = NULL;
    snaken_error = create_snaken(
       &snaken,
-      world_width,
-      world_height
+      WORLD_WIDTH,
+      WORLD_HEIGHT
    );
    if (snaken_error != SNAKEN_ERROR_NONE) {
       printf("There was an error creating the snaken: %d\n", snaken_error);
@@ -245,19 +258,6 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    // Run evaluation.
    // ##########################################
-
-   #ifdef GRAPHICS
-   int window_width = world_width * 20;
-   int window_height = world_height * 20;
-
-   InitWindow(
-      window_width,
-      window_height,
-      "BHM SNAKE"
-   );
-
-   SetTargetFPS(960);
-   #endif
 
    bhm_ticks_count_t timestep = 0;
 
@@ -374,15 +374,25 @@ bhm_error_code_t eval_cortex(
       // t0 = nanos();
 
       #ifdef GRAPHICS
-      draw_snaken(snaken, window_width, window_height);
+      BeginDrawing();
+         ClearBackground(BLACK);
+         draw_snaken(
+            snaken,
+            WINDOW_WIDTH,
+            WINDOW_HEIGHT
+         );
+         draw_cortex(
+            prev_cortex,
+            WINDOW_WIDTH,
+            WINDOW_HEIGHT
+         );
+      EndDrawing();
       #endif
+
+      // usleep(10000);
    }
 
    // printf("Evaluated cortex in %llu ms\n", millis() - t0);
-
-   #ifdef GRAPHICS
-   CloseWindow();
-   #endif
 
    // ##########################################
    // ##########################################
@@ -469,15 +479,12 @@ int evolve(
       );
 
       const int population_selection_pool_size = (int) (POP_SIZE / 10);
-      const int cortices_width = 12;
-      const int cortices_height = 4;
-      const int cortices_nh_radius = 2;
 
       bhm_error = p2d_init(
          &population,
          pop_size,
          population_selection_pool_size,
-         0x5FFFFFFF,
+         POP_MUT_CHANCE,
          &eval_cortex
          // &dummy_eval
       );
@@ -488,9 +495,9 @@ int evolve(
 
       bhm_error = p2d_populate(
          population,
-         cortices_width,
-         cortices_height,
-         cortices_nh_radius
+         CORTICES_WIDTH,
+         CORTICES_HEIGHT,
+         CORTICES_NH_RADIUS
       );
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error populating the cortices: %d\n", bhm_error);
@@ -499,6 +506,16 @@ int evolve(
       // ##########################################
       // ##########################################
    }
+
+   #ifdef GRAPHICS
+   InitWindow(
+      WINDOW_WIDTH,
+      WINDOW_HEIGHT,
+      "BHM SNAKE"
+   );
+
+   SetTargetFPS(960);
+   #endif
 
    #ifdef PLOT
    // Start real-time plotting.
@@ -539,6 +556,7 @@ int evolve(
          printf("There was an error selecting survivors: %d\n", bhm_error);
          return 1;
       }
+
       #ifdef PLOT
       x_plot_data[i] = i;
       y_plot_data[i] = population->cortices_fitness[population->selection_pool[0]];
@@ -567,9 +585,12 @@ int evolve(
          population->selection_pool[0],
          population->cortices_fitness[population->selection_pool[0]]
       );
+
+      #ifdef GRAPHICS
       char cortex_string[100];
       c2d_to_string(&(population->cortices[population->selection_pool[0]]), cortex_string);
       printf("%s", cortex_string);
+      #endif
 
       // Save the best cortex to file before the population is reset by crossover.
       // char file_name[100];
@@ -589,9 +610,14 @@ int evolve(
    // ##########################################
    // Cleanup.
    // ##########################################
+   #ifdef GRAPHICS
+   CloseWindow();
+   #endif
+
    #ifdef PLOT
    pclose(gnuplotPipe);
    #endif
+
    p2d_destroy(population);
    // ##########################################
    // ##########################################
