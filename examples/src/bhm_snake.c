@@ -1,5 +1,5 @@
-// #define GRAPHICS
-#define PLOT
+#define GRAPHICS
+// #define PLOT
 
 #include <stdio.h>
 #include <getopt.h>
