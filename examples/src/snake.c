@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <snaken/snaken.h>
-#include <snaken/graphics.h>
 #include "draw_snaken.h"
 
 char cell_type_to_char(snaken_cell_type_t cell_type) {
@@ -47,7 +46,7 @@ int main(void) {
         return 1;
     }
 
-    error = snaken2d_set_self_intersect(snaken, SNAKEN_FALSE);
+    error = snaken2d_set_self_intersect(snaken, SNAKEN_TRUE);
     if (error != SNAKEN_ERROR_NONE) {
        printf("There was an error updating intersaction rules: %d\n", error);
        return 1;
@@ -84,7 +83,11 @@ int main(void) {
     }
     snaken2d_set_walls(snaken, 10, walls);
 
-    InitWindow(screen_width, screen_height, "Snaken");
+    InitWindow(
+        screen_width,
+        screen_height,
+        "SNAKE"
+    );
 
     SetTargetFPS(60);
     //---------------------------------------------------------------------------------
@@ -131,6 +134,7 @@ int main(void) {
 
         // Draw
         //----------------------------------------------------------------------------------
+        ClearBackground(BLACK);
         draw_snaken(snaken, screen_width, screen_height);
         //----------------------------------------------------------------------------------
     }

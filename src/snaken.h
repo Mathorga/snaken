@@ -45,7 +45,8 @@ extern "C" {
 // |n| is the size of the second dimension.
 #define IDX3D(i, j, k, m, n) (((m) * (n) * (k)) + ((m) * (j)) + (i))
 
-typedef uint32_t snaken_world_size_t;
+// This MUST be signed, as -1 is used as view value.
+typedef int32_t snaken_world_size_t;
 typedef uint8_t snaken_snake_speed_t;
 typedef uint8_t snaken_snake_stamina_t;
 
