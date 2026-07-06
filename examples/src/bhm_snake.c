@@ -363,6 +363,7 @@ bhm_error_code_t eval_cortex(
       // t0 = nanos();
 
       // Use cortex output to control the snake.
+      // The snake should do nothing (keep going straight) if the two outputs are equal.
       if (mean_left_output > mean_right_output) {
          snaken2d_turn_left(snaken);
       } else if (mean_right_output > mean_left_output) {

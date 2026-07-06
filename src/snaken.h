@@ -11,6 +11,7 @@ Copyright (C) 2024 Luka Micheletti
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "error.h"
 
@@ -44,7 +45,7 @@ extern "C" {
 // |n| is the size of the second dimension.
 #define IDX3D(i, j, k, m, n) (((m) * (n) * (k)) + ((m) * (j)) + (i))
 
-typedef int32_t snaken_world_size_t;
+typedef uint32_t snaken_world_size_t;
 typedef uint8_t snaken_snake_speed_t;
 typedef uint8_t snaken_snake_stamina_t;
 

@@ -9,10 +9,10 @@ snaken_error_code_t draw_snaken(
 ) {
     const int cell_width = window_width / snaken->world_width;
     const int cell_height = window_height / snaken->world_height;
-    Color snake_head_color = (Color) {0x7F, 0xFF, 0x55, 0xFF};
-    Color snake_tail_color = (Color) {0x11, 0x33, 0x44, 0xFF};
-    Color apple_color = (Color) {0xFF, 0x5A, 0x5A, 0xFF};
-    Color wall_color = (Color) {0xFF, 0xFF, 0xFF, 0xFF};
+    const Color snake_head_color = (Color) {0x7F, 0xFF, 0x55, 0xFF};
+    const Color snake_tail_color = (Color) {0x11, 0x33, 0x44, 0xFF};
+    const Color apple_color = (Color) {0xFF, 0x5A, 0x5A, 0xFF};
+    const Color wall_color = (Color) {0xFF, 0xFF, 0xFF, 0xFF};
 
     // Draw snake (tail to head in order to always show the head on top).
     for (int i = snaken->snake_length - 1; i >= 0; i--) {
@@ -52,12 +52,46 @@ snaken_error_code_t draw_snaken(
         DrawRectangle(apple_location_x * cell_width, apple_location_y * cell_height, cell_width, cell_height, apple_color);
     }
 
+    const int font_size = 20;
+    const int text_padding_x = 8;
+    const int text_padding_y = 8;
+
     // Draw snake length.
-    DrawText(TextFormat("Length: %i", snaken->snake_length), 10, 10, 20, RAYWHITE);
-    DrawText(TextFormat("speed: %i", snaken->snake_speed), 10, 30, 20, RAYWHITE);
-    DrawText(TextFormat("speed_step: %i", snaken->snake_speed_step), 10, 50, 20, RAYWHITE);
-    DrawText(TextFormat("stamina: %i", snaken->snake_stamina), 10, 70, 20, RAYWHITE);
-    DrawText(TextFormat("stamina_step: %i", snaken->snake_stamina_step), 10, 90, 20, RAYWHITE);
+    DrawText(
+        TextFormat("Length: %i", snaken->snake_length),
+        text_padding_x,
+        text_padding_y,
+        font_size,
+        RAYWHITE
+    );
+    DrawText(
+        TextFormat("speed: %i", snaken->snake_speed),
+        text_padding_x,
+        text_padding_y + font_size,
+        font_size,
+        RAYWHITE
+    );
+    DrawText(
+        TextFormat("speed_step: %i", snaken->snake_speed_step),
+        text_padding_x,
+        text_padding_y + font_size * 2,
+        font_size,
+        RAYWHITE
+    );
+    DrawText(
+        TextFormat("stamina: %i", snaken->snake_stamina),
+        text_padding_x,
+        text_padding_y + font_size * 3,
+        font_size,
+        RAYWHITE
+    );
+    DrawText(
+        TextFormat("stamina_step: %i", snaken->snake_stamina_step),
+        text_padding_x,
+        text_padding_y + font_size * 4,
+        font_size,
+        RAYWHITE
+    );
 
     return SNAKEN_ERROR_NONE;
 }

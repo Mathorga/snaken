@@ -296,11 +296,23 @@ snaken_error_code_t snaken2d_set_snake_length(
     snaken2d_t* snaken,
     snaken_world_size_t length
 ) {
-    snaken->snake_length = length;
-    snaken->snake_body = (snaken_world_size_t*) realloc(snaken->snake_body, snaken->snake_length * sizeof(snaken_world_size_t));
+    snaken->snake_body = (snaken_world_size_t*) realloc(snaken->snake_body, length * sizeof(snaken_world_size_t));
     if (snaken->snake_body == NULL) {
         return SNAKEN_ERROR_FAILED_ALLOC;
     }
+
+    // Place the new body pieces exactly on the existing tail.
+    if (snaken->snake_length < length) {
+        for (snaken_world_size_t i = snaken->snake_length; i < length; i++) {
+            snaken->snake_body[i] = snaken->snake_body[snaken->snake_length - 1];
+        }
+    }
+
+    // Only update snake out length if the snake is already all out.
+    if (snaken->snake_out_length == snaken->snake_length) snaken->snake_out_length = length;
+
+    // Finally update the snake actual length.
+    snaken->snake_length = length;
 
     return SNAKEN_ERROR_NONE;
 }

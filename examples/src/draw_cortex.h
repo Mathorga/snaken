@@ -56,8 +56,9 @@ bhm_error_code_t draw_cortex(
     }
 
     // Draw cortex info.
-    const int text_padding = 10;
-    const int font_size = 10;
+    const int text_padding = 8;
+    const int font_size = 20;
+
     const char* width_text = TextFormat(
         "width: %i",
         cortex->width
