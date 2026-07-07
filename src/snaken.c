@@ -391,7 +391,7 @@ snaken_error_code_t snaken2d_spawn_apple(snaken2d_t* snaken, snaken_world_size_t
     do {
         // Compute a random location for the apple.
         apple_x = rand() % snaken->world_width;
-        apple_y = rand() & snaken->world_height;
+        apple_y = rand() % snaken->world_height;
         apple_location = IDX2D(apple_x, apple_y, snaken->world_width);
 
         // Make sure the picked location is free from walls.

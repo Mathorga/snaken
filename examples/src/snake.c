@@ -134,8 +134,10 @@ int main(void) {
 
         // Draw
         //----------------------------------------------------------------------------------
-        ClearBackground(BLACK);
-        draw_snaken(snaken, screen_width, screen_height);
+        BeginDrawing();
+            ClearBackground(BLACK);
+            draw_snaken(snaken, screen_width, screen_height);
+        EndDrawing();
         //----------------------------------------------------------------------------------
     }
 
