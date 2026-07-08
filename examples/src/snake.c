@@ -2,32 +2,6 @@
 #include <snaken/snaken.h>
 #include "draw_snaken.h"
 
-char cell_type_to_char(snaken_cell_type_t cell_type) {
-    switch (cell_type) {
-        case SNAKEN_SNAKE_HEAD:
-            return 'O';
-        case SNAKEN_SNAKE_BODY:
-            return 'o';
-        case SNAKEN_APPLE:
-            return '@';
-        case SNAKEN_WALL:
-            return 'H';
-        case SNAKEN_EMPTY:
-        default:
-            return '+';
-    }
-}
-
-void print_snake_view(snaken_cell_type_t* view, snaken_world_size_t view_diameter) {
-    for (snaken_world_size_t y = view_diameter - 1; y >= 0; y--) {
-        for (snaken_world_size_t x = view_diameter - 1; x >= 0; x--) {
-            printf("%c ", cell_type_to_char(view[IDX2D(x, y, view_diameter)]));
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
 int main(void) {
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -69,8 +43,8 @@ int main(void) {
        printf("There was an error setting the amount of apples: %d\n", error);
        return 1;
     }
-    snaken_world_size_t snaken_view_width = NH_DIAM_2D(snaken->snake_view_radius);
-    snaken_cell_type_t* view = (snaken_cell_type_t*) malloc(snaken_view_width * snaken_view_width * sizeof(snaken_cell_type_t));
+    // snaken_world_size_t snaken_view_width = NH_DIAM_2D(snaken->snake_view_radius);
+    // snaken_cell_type_t* view = (snaken_cell_type_t*) malloc(snaken_view_width * snaken_view_width * sizeof(snaken_cell_type_t));
 
     // Set up some walls.
     snaken_world_size_t* walls = (snaken_world_size_t*) malloc(10 * sizeof(snaken_world_size_t));
@@ -117,12 +91,12 @@ int main(void) {
             default:
                 break;
         }
-        error = snaken2d_get_snake_view(snaken, view);
-        if (error != SNAKEN_ERROR_NONE) {
-            printf("There was an error retrieving the snake view: %d\n", error);
-            return 1;
-        }
-        print_snake_view(view, snaken_view_width);
+        // error = snaken2d_get_snake_view(snaken, view);
+        // if (error != SNAKEN_ERROR_NONE) {
+        //     printf("There was an error retrieving the snake view: %d\n", error);
+        //     return 1;
+        // }
+        // print_snake_view(view, snaken_view_width);
 
         // Tick the snaken.
         error = snaken2d_tick(snaken);

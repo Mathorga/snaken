@@ -1,5 +1,5 @@
-#define GRAPHICS
-// #define PLOT
+// #define GRAPHICS
+#define PLOT
 
 #include <stdio.h>
 #include <getopt.h>
@@ -47,37 +47,6 @@ bhm_ticks_count_t snake_view_to_pulse(
    return (sample_window / (4 + damping)) * (snake_view + damping);
 }
 
-char cell_type_to_char(snaken_cell_type_t cell_type) {
-    switch (cell_type) {
-        case SNAKEN_SNAKE_HEAD:
-            return 'X';
-        case SNAKEN_SNAKE_BODY:
-            return 'x';
-        case SNAKEN_APPLE:
-            return '@';
-        case SNAKEN_WALL:
-            return 'H';
-        case SNAKEN_EMPTY:
-        default:
-            return '.';
-    }
-}
-
-void print_snake_view(
-   snaken_cell_type_t* view,
-   snaken_world_size_t view_diameter
-) {
-    for (snaken_world_size_t y = view_diameter - 1; y >= 0; y--) {
-    // for (snaken_world_size_t y = 0; y < view_diameter; y++) {
-        for (snaken_world_size_t x = view_diameter - 1; x >= 0; x--) {
-        // for (snaken_world_size_t x = 0; x < view_diameter; x++) {
-            printf("%c ", cell_type_to_char(view[IDX2D(x, y, view_diameter)]));
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
 bhm_error_code_t dummy_eval(
    bhm_cortex2d_t* cortex,
    bhm_cortex_fitness_t* fitness
@@ -93,7 +62,7 @@ snaken_error_code_t create_snaken(
 ) {
    snaken_error_code_t snaken_error;
 
-   srand(2);
+   // srand(2);
 
    snaken_error = snaken2d_init(snaken, world_width, world_height);
    if (snaken_error != SNAKEN_ERROR_NONE) {
@@ -285,6 +254,8 @@ bhm_error_code_t eval_cortex(
          return BHM_ERROR_EXTERNAL_CAUSES;
       }
 
+      // print_snake_view(snake_view, NH_DIAM_2D(snaken->snake_view_radius));
+
       // t1 = nanos();
       // printf("Got snake view in %llu ns\n", t1 - t0);
       // t0 = nanos();
@@ -375,6 +346,9 @@ bhm_error_code_t eval_cortex(
       // t0 = nanos();
 
       #ifdef GRAPHICS
+      switch(GetKeyPressed()) {
+         case KEY_SPACE:
+      }
       BeginDrawing();
          ClearBackground(BLACK);
          draw_snaken(
@@ -398,7 +372,11 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    // ##########################################
 
-   *fitness = snaken->snake_length + timestep;
+   *fitness = (
+      2 * snaken->snake_length +
+      100 * snaken->eaten_apples_count +
+      5 * timestep
+   );
 
    // Cleanup.
    bhm_error = c2d_destroy(tmp_cortex);
@@ -520,17 +498,17 @@ int evolve(
 
    #ifdef PLOT
    // Start real-time plotting.
-   FILE* gnuplotPipe = popen("gnuplot -persistent", "w");
+   FILE* gnuplot_pipe = popen("gnuplot -persistent", "w");
    
-   if (gnuplotPipe == NULL) {
+   if (gnuplot_pipe == NULL) {
       printf("Could not open pipe to gnuplot\n");
       return 1;
    }
    
    // Initial gnuplot configuration.
-   fprintf(gnuplotPipe, "set title 'Best cortex fitness'\n");
-   fprintf(gnuplotPipe, "set yrange [2000:10000]\n");
-   fprintf(gnuplotPipe, "set xrange [0:%d]\n", gens_count);
+   fprintf(gnuplot_pipe, "set title 'Best cortex fitness'\n");
+   fprintf(gnuplot_pipe, "set yrange [2000:10000]\n");
+   fprintf(gnuplot_pipe, "set xrange [0:%d]\n", gens_count);
    double x_plot_data[gens_count];
    double y_plot_data[gens_count];
    #endif
@@ -563,20 +541,20 @@ int evolve(
       y_plot_data[i] = population->cortices_fitness[population->selection_pool[0]];
 
       // Plot data.
-      if (i % 10 == 0) {
+      if (i % 1000 == 0) {
          // Tell gnuplot to plot data from standard input ('-').
-         fprintf(gnuplotPipe, "plot '-' with lines title 'Signal'\n");
+         fprintf(gnuplot_pipe, "plot '-' with lines title 'Signal'\n");
 
          // Send the raw X/Y data directly through the pipe.
          for (int j = 0; j <= i; j++) {
-            fprintf(gnuplotPipe, "%f %f\n", x_plot_data[j], y_plot_data[j]);
+            fprintf(gnuplot_pipe, "%f %f\n", x_plot_data[j], y_plot_data[j]);
          }
 
          // Send the 'e' character to tell gnuplot the data block is finished.
-         fprintf(gnuplotPipe, "e\n");
+         fprintf(gnuplot_pipe, "e\n");
          
          // Flush the pipe to ensure the commands are executed immediately.
-         fflush(gnuplotPipe);
+         fflush(gnuplot_pipe);
       }
       #endif
 
@@ -616,7 +594,7 @@ int evolve(
    #endif
 
    #ifdef PLOT
-   pclose(gnuplotPipe);
+   pclose(gnuplot_pipe);
    #endif
 
    p2d_destroy(population);
@@ -691,9 +669,20 @@ int main(int argc, char** argv) {
       );
    }
 
+   // The help command is invoked.
    if (strcmp(argv[1], "help") == 0) {
-      // TODO.
-      printf("Help requested\n");
+      printf("\n");
+      printf("Available commands:\n");
+      printf("\n");
+      printf("evolve - performs evolution of a population of behema cortices on a snake environment.\n");
+      printf("\tAvailable parameters:\n");
+      printf("\t\t--pop_size [default 20] - sets the size of the population to evolve.\n");
+      printf("\t\t--max_eval_time [default 10000] - sets the maximum number of steps each evaluation can take.\n");
+      printf("\t\t--gens_count [default 10000] - sets how many generations to evolve for.\n");
+      printf("\t\t--pop_file_path - Tells the program to evolve an existing population from file. If --pop_file_path is provided, --pop_size is ignored.\n");
+      printf("\n");
+      printf("help - shows this help text.\n");
+      printf("\n");
       return 0;
    }
 

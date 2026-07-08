@@ -32,6 +32,7 @@ snaken_error_code_t snaken2d_init(
     if ((*snaken)->apples == NULL) {
         return SNAKEN_ERROR_FAILED_ALLOC;
     }
+    (*snaken)->eaten_apples_count = 0;
 
     // Populate apples.
     for (snaken_world_size_t i = 0; i < (*snaken)->apples_length; i++) {
@@ -537,6 +538,9 @@ snaken_error_code_t snaken2d_eat_apple(snaken2d_t* snaken, snaken_bool_t* result
         if (snaken->snake_body[0] == snaken->apples[i]) {
             // An apple was found, so eat it and increase the snake length:
             (*result) = SNAKEN_TRUE;
+
+            // Increase the number of eaten apples.
+            snaken->eaten_apples_count++;
 
             // Eat the apple and spawn a new one.
             snaken2d_spawn_apple(snaken, i);

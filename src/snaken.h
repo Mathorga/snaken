@@ -122,6 +122,9 @@ typedef struct {
     // Apples array.
     snaken_world_size_t* apples;
 
+    // Total amount of apples eaten by the snake.
+    snaken_world_size_t eaten_apples_count;
+
     // ################
     // ################
 
