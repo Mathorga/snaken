@@ -1,5 +1,5 @@
-// #define GRAPHICS
-#define PLOT
+#define GRAPHICS
+// #define PLOT
 
 #include <stdio.h>
 #include <getopt.h>
@@ -11,12 +11,15 @@
 #include "draw_cortex.h"
 #endif
 
+#define MIN(a, b) (a) < (b) ? (a) : (b)
+
 #define POP_SIZE 20
 #define MAX_EVAL_TIME 10000
 #define GENERATIONS_COUNT 10000
 
 #define WORLD_WIDTH 30
 #define WORLD_HEIGHT 30
+#define SNAKE_VIEW_RADIUS 0x03u
 
 #define CORTICES_WIDTH 20
 #define CORTICES_HEIGHT 4
@@ -47,6 +50,23 @@ bhm_ticks_count_t snake_view_to_pulse(
    return (sample_window / (4 + damping)) * (snake_view + damping);
 }
 
+void snake_view_to_inputs(
+   snaken_cell_type_t* snake_view,
+   bhm_input2d_t* left_apples_sensor,
+   bhm_input2d_t* left_danger_sensor,
+   bhm_input2d_t* right_apples_sensor,
+   bhm_input2d_t* right_danger_sensor
+) {
+   snaken_world_size_t view_diameter = NH_DIAM_2D(SNAKE_VIEW_RADIUS);
+
+   // Read the top left and top right quadrants of the snake view to count dangers and apples.
+   for (snaken_world_size_t y = view_diameter - 1; y >= 0; y--) {
+      for (snaken_world_size_t x = view_diameter - 1; x >= 0; x--) {
+         //TODO
+      }
+    }
+}
+
 bhm_error_code_t dummy_eval(
    bhm_cortex2d_t* cortex,
    bhm_cortex_fitness_t* fitness
@@ -62,7 +82,7 @@ snaken_error_code_t create_snaken(
 ) {
    snaken_error_code_t snaken_error;
 
-   // srand(2);
+   // srand(21);
 
    snaken_error = snaken2d_init(snaken, world_width, world_height);
    if (snaken_error != SNAKEN_ERROR_NONE) {
@@ -163,23 +183,51 @@ bhm_error_code_t eval_cortex(
    // ##########################################
    // Input init.
    // ##########################################
-   bhm_ticks_count_t mean_input = 0;
-   snaken_world_size_t snaken_view_width = NH_DIAM_2D(snaken->snake_view_radius);
-   snaken_cell_type_t* snake_view = (snaken_cell_type_t*) malloc(snaken_view_width * snaken_view_width * sizeof(snaken_cell_type_t));
-   bhm_cortex_size_t input_width = clamp(snaken_view_width * snaken_view_width, 0, cortex->width);
-   bhm_input2d_t* input;
+   snaken_world_size_t snake_view_diam = NH_DIAM_2D(snaken->snake_view_radius);
+   snaken_cell_type_t* snake_view = (snaken_cell_type_t*) malloc(snake_view_diam * snake_view_diam * sizeof(snaken_cell_type_t));
+   bhm_cortex_size_t input_width = snake_view_diam;
+   bhm_input2d_t* left_apples_sensor;
    bhm_error = i2d_init(
-      &input,
-      (cortex->width / 2) - (input_width / 2),
-      0,
-      (cortex->width / 2) + (input_width / 2),
-      1,
+      &left_apples_sensor,
+      0, 0,
+      1, 1,
       BHM_MAX_EXC_VALUE * 2,
       BHM_PULSE_MAPPING_FPROP
    );
    if (bhm_error != BHM_ERROR_NONE) {
-      printf("i2d x0 %d x1 %d\n", (cortex->width / 2) - (input_width / 2), (cortex->width / 2) + (input_width / 2));
-      printf("There was an error allocating input %d\n", bhm_error);
+      printf("There was an error allocating left apples sensor %d\n", bhm_error);
+      return bhm_error;
+   }
+   bhm_input2d_t* right_apples_sensor;
+   bhm_error = i2d_init(
+      &right_apples_sensor,
+      CORTICES_WIDTH - 2, 0,
+      CORTICES_WIDTH - 1, 1,
+      BHM_MAX_EXC_VALUE * 2,
+      BHM_PULSE_MAPPING_FPROP
+   );
+   bhm_input2d_t* left_danger_sensor;
+   bhm_error = i2d_init(
+      &left_danger_sensor,
+      4, 0,
+      5, 1,
+      BHM_MAX_EXC_VALUE * 2,
+      BHM_PULSE_MAPPING_FPROP
+   );
+   if (bhm_error != BHM_ERROR_NONE) {
+      printf("There was an error allocating left danger sensor %d\n", bhm_error);
+      return bhm_error;
+   }
+   bhm_input2d_t* right_danger_sensor;
+   bhm_error = i2d_init(
+      &right_danger_sensor,
+      CORTICES_WIDTH - 6, 0,
+      CORTICES_WIDTH - 5, 1,
+      BHM_MAX_EXC_VALUE * 2,
+      BHM_PULSE_MAPPING_FPROP
+   );
+   if (bhm_error != BHM_ERROR_NONE) {
+      printf("There was an error allocating right danger sensor %d\n", bhm_error);
       return bhm_error;
    }
 
@@ -261,30 +309,34 @@ bhm_error_code_t eval_cortex(
       // t0 = nanos();
 
       // printf("SNAKE_DIR: %d\n", snaken->snake_direction);
-      // print_snake_view(snake_view, snaken_view_width);
+      // print_snake_view(snake_view, snake_view_diam);
 
       // Feed input to the cortex.
-      // Only the frontal snake view is fed as input to the network.
-      for (bhm_cortex_size_t y = 0; y < input->y1 - input->y0; y++) {
-         for (bhm_cortex_size_t x = 0; x < input->x1 - input->x0; x++) {
-            // TODO Generalize linear interpolation: https://gist.github.com/Mathorga/3ec1425af3853a69ecc8f4e5d9d4d523
-            float t = ((float) x) * (snaken_view_width - 1) / (input_width - 1);
-            int index = (int) t;
-            float frac = t - index;
-
-            if (index < snaken_view_width - 1) {
-               bhm_ticks_count_t lower_view_value = snake_view_to_pulse(snake_view[IDX2D(index, y, snaken_view_width)], prev_cortex->sample_window) * (1 - frac);
-               bhm_ticks_count_t higher_view_value = snake_view_to_pulse(snake_view[IDX2D(index + 1, y, snaken_view_width)], prev_cortex->sample_window) * frac;
-               input->values[IDX2D(x, y, input->x1 - input->x0)] = lower_view_value + higher_view_value;
-            } else {
-               input->values[IDX2D(x, y, input->x1 - input->x0)] = snake_view_to_pulse(snake_view[IDX2D(index, y, snaken_view_width)], prev_cortex->sample_window);
-            }
-         }
-      }
-      i2d_mean(input, &mean_input);
+      snake_view_to_inputs(
+         snake_view,
+         left_apples_sensor,
+         left_danger_sensor,
+         right_apples_sensor,
+         right_danger_sensor
+      );
       c2d_feed2d(
          prev_cortex,
-         input,
+         left_apples_sensor,
+         timestep
+      );
+      c2d_feed2d(
+         prev_cortex,
+         right_apples_sensor,
+         timestep
+      );
+      c2d_feed2d(
+         prev_cortex,
+         left_danger_sensor,
+         timestep
+      );
+      c2d_feed2d(
+         prev_cortex,
+         right_danger_sensor,
          timestep
       );
 
@@ -346,9 +398,6 @@ bhm_error_code_t eval_cortex(
       // t0 = nanos();
 
       #ifdef GRAPHICS
-      switch(GetKeyPressed()) {
-         case KEY_SPACE:
-      }
       BeginDrawing();
          ClearBackground(BLACK);
          draw_snaken(
@@ -384,7 +433,7 @@ bhm_error_code_t eval_cortex(
       printf("There was an error destroying the tmp cortex: %d\n", bhm_error);
       return bhm_error;
    }
-   bhm_error = i2d_destroy(input);
+   bhm_error = i2d_destroy(left_apples_sensor);
    if (bhm_error != BHM_ERROR_NONE) {
       printf("There was an error destroying the cortex input: %d\n", bhm_error);
       return bhm_error;
@@ -576,7 +625,7 @@ int evolve(
       // snprintf(file_name, 100, "out/bog_%d.c2d", i);
       // c2d_to_file(&(population->cortices[population->selection_pool[0]]), file_name);
 
-      bhm_error = p2d_crossover(population, BHM_TRUE);
+      bhm_error = p2d_crossover(population, BHM_TRUE, BHM_FALSE);
       if (bhm_error != BHM_ERROR_NONE) {
          printf("There was an error crossing survivors over: %d\n", bhm_error);
          return 1;
